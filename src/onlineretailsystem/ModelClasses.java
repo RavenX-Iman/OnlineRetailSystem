@@ -23,6 +23,10 @@ public class ModelClasses {
         private List<Order> orders;
 
         // Constructor
+        public Customer(){
+
+        }
+
         public Customer(String fn, String ln, String e, String p,String ad, String c, String s,String code, String cou) {
             this.firstName = fn;
             this.lastName =ln;
@@ -39,80 +43,80 @@ public class ModelClasses {
         }
 
         // Getters and Setters
-        void setFirstName(String fn){
+        public void setFirstName(String fn){
             firstName = fn;
         }
         String getFirstName(){
             return firstName;
         }
 
-        void setLastName(String ln){
+        public void setLastName(String ln){
             lastName = ln;
         }
         String getLastName(){
             return lastName;
         }
 
-        void setEmail(String e) {
+        public void setEmail(String e) {
             email = e;
         }
         String getEmail() {
             return email;
         }
 
-        void setPhone(String p) {
+        public void setPhone(String p) {
             phone = p;
         }
         String getPhone() {
             return phone;
         }
 
-        void setAddress(String ad) {
+        public void setAddress(String ad) {
             address = ad;
         }
         String getAddress() {
             return address;
         }
 
-        void setCity(String c) {
+        public void setCity(String c) {
             city = c;
         }
         String getCity() {
             return city;
         }
 
-        void setState(String s) {
+        public void setState(String s) {
             state = s;
         }
         String getState() {
             return state;
         }
 
-        void setPostalCode(String code) {
+        public void setPostalCode(String code) {
             postalCode = code;
         }
         String getPostalCode() {
             return postalCode;
         }
 
-        void setCountry(String cou) {
+        public void setCountry(String cou) {
             country = cou;
         }
         String getCountry() {
             return country;
         }
 
-        void setCreatedAt(LocalDateTime ca) {
+        public void setCreatedAt(LocalDateTime ca) {
             createdAt = ca;
         }
         LocalDateTime getCreatedAt() {
             return createdAt;
         }
         public int getCustomerId() {
-            return customerId; 
+            return customerId;
         }
         void setCustomerId(int id) {
-        this.customerId = id;
+            this.customerId = id;
         }
 
 
@@ -181,21 +185,35 @@ public class ModelClasses {
         private String createdBy;
         private LocalDateTime modifiedAt;
 
-        public Product(String pn, Category c, BigDecimal p, int s) {
-            productName = pn;
-            category = c;
-            price = p;
-            stock = s;
-            createdAt = LocalDateTime.now();
-            modifiedAt = LocalDateTime.now();
-            createdBy = "SYSTEM";
+        public Product(String productName, Category category, BigDecimal price, int stock) {
+            this.productId = 0; // default or auto-generated
+            this.productName = productName;
+            this.category = category;
+            this.price = price;
+            this.stock = stock;
+            this.createdAt = LocalDateTime.now();
+            this.modifiedAt = LocalDateTime.now();
+            this.createdBy = "System"; // or get from current user
+        }
+
+
+        public Product(int productId, String productName, Category category, BigDecimal price, int stock,
+                       LocalDateTime createdAt, String createdBy, LocalDateTime modifiedAt) {
+            this.productId = productId;
+            this.productName = productName;
+            this.category = category;
+            this.price = price;
+            this.stock = stock;
+            this.createdAt = createdAt;
+            this.createdBy = createdBy;
+            this.modifiedAt = modifiedAt;
         }
 
         // Constructor with CreatedBy
-        public Product(String productName, Category category, BigDecimal price, int stock, String createdBy) {
-            this(productName, category, price, stock);
-            this.createdBy = createdBy;
-        }
+//        public Product(String productName, Category category, BigDecimal price, int stock, String createdBy) {
+//            this(productName, category, price, stock);
+//            this.createdBy = createdBy;
+//        }
 
 
         // Getters and Setters
@@ -268,6 +286,10 @@ public class ModelClasses {
         private List<OrderItem> orderItems;
         private Payment payment;
 
+        public Order(){
+
+        }
+
         public Order(Customer c) {
             customer = c;
             orderDate = LocalDateTime.now();
@@ -282,8 +304,16 @@ public class ModelClasses {
         public void setOrderId(int oi) {
             this.orderId = oi; }
 
+        public Customer setCustomer(Customer c){
+            customer = c;
+            return c;
+        }
         public Customer getCustomer() {
             return customer; }
+
+        public void setOrderDate(LocalDateTime orderDate) {
+            this.orderDate = orderDate;
+        }
         public LocalDateTime getOrderDate() {
             return orderDate; }
 
@@ -294,6 +324,9 @@ public class ModelClasses {
         public OrderStatus getStatus() { return status; }
         public void setStatus(OrderStatus s) { status = s; }
 
+        public void setOrderItems(List<OrderItem> orderItems) {
+            this.orderItems = orderItems;
+        }
         public List<OrderItem> getOrderItems() { return orderItems; }
 
         public void addOrderItem(OrderItem item) {
@@ -317,36 +350,41 @@ public class ModelClasses {
 
         @Override
         public String toString() {
-            return "Order{" +
-                    "orderId=" + orderId +
-                    ", customer=" + customer.getFirstName()+" " + customer.getLastName() +
-                    ", totalAmount=" + totalAmount +
-                    ", status=" + status +
-                    '}';
+            return "Order{" + "orderId=" + orderId + ", customer=" + customer.getFirstName()+" " + customer.getLastName() + ", totalAmount=" + totalAmount +
+                    ", status=" + status + '}';
         }
     }
     public static class OrderItem {
         private int orderItemId;
         private Order order;
-        private Product product;
+        private Product productName;
         private int quantity;
         private BigDecimal price;
 
+        public OrderItem(){
+
+        }
+
         public OrderItem(Order o, Product p, int q) {
             order = o;
-            product = p;
+            productName = p;
             quantity = q;
-            price = product.getPrice(); // Capture price at time of order
+            price = productName.getPrice(); // Capture price at time of order
         }
 
         // Getters and Setters
-        public void setOrderItemId(int id) { orderItemId = id; }
+
+        public void setOrderItemId(int id) {
+            orderItemId = id; }
         public int getOrderItemId() {
             return orderItemId; }
 
         public Order getOrder() { return order; }
 
-        public Product getProduct() { return product; }
+        public void setProductName(String p) {
+            productName = productName;
+        }
+        public Product getProductName() { return productName; }
 
         public void setQuantity(int q) { quantity = q; }
         public int getQuantity() { return quantity; }
@@ -361,7 +399,7 @@ public class ModelClasses {
         @Override
         public String toString() {
             return "OrderItem{" +
-                    "product=" + product.getProductName() +
+                    "product=" + productName.getProductName() +
                     ", quantity=" + quantity +
                     ", price=" + price +
                     ", subtotal=" + getSubTotal() +
@@ -380,6 +418,10 @@ public class ModelClasses {
         private PaymentMethod paymentMethod;
         private String transactionId;
         private LocalDateTime paymentDate;
+
+        public Payment(){
+
+        }
 
         public Payment(Order o, BigDecimal a, PaymentMethod pm) {
             order = o;
@@ -426,6 +468,10 @@ public class ModelClasses {
         private String reason;
         private LocalDateTime createdAt;
 
+        public InventoryTransaction(){
+
+        }
+
         public InventoryTransaction(Product p, TransactionType t, int q, String r) {
             this.product = p;
             this.transactionType = t;
@@ -435,6 +481,26 @@ public class ModelClasses {
         }
 
         // Getters and Setters
+        public void setProduct(Product product) {
+            this.product = product;
+        }
+
+        public void setTransactionType(TransactionType transactionType) {
+            this.transactionType = transactionType;
+        }
+
+        public void setQuantity(int quantity) {
+            this.quantity = quantity;
+        }
+
+        public void setReason(String reason) {
+            this.reason = reason;
+        }
+
+        public void setCreatedAt(LocalDateTime createdAt) {
+            this.createdAt = createdAt;
+        }
+
         public int getTransactionId() { return transactionId; }
         public void setTransactionId(int transactionId) { this.transactionId = transactionId; }
 

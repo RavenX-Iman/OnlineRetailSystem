@@ -18,9 +18,9 @@ public class CategoryDAO {
 
             while (rs.next()) {
                 Category category = new Category(
-                    rs.getInt("CategoryID"),
-                    rs.getString("CategoryName"),
-                    rs.getString("Description")
+                        rs.getInt("CategoryID"),
+                        rs.getString("CategoryName"),
+                        rs.getString("Description")
                 );
                 categories.add(category);
             }
@@ -47,6 +47,40 @@ public class CategoryDAO {
 
         } catch (SQLException e) {
             System.out.println("Insert failed: " + e.getMessage());
+        }
+    }
+
+    public void updateCategory(Category category) {
+        String sql = "UPDATE Categories_table SET CategoryName = ?, Description = ? WHERE CategoryID = ?";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, category.getCategoryName());
+            stmt.setString(2, category.getDescription());
+            stmt.setInt(3, category.getCategoryId());
+
+            int rowsUpdated = stmt.executeUpdate();
+            System.out.println("Updated " + rowsUpdated + " category(s).");
+
+        } catch (SQLException e) {
+            System.out.println("Update failed: " + e.getMessage());
+        }
+    }
+
+    public void deleteCategory(int categoryId) {
+        String sql = "DELETE FROM Categories_table WHERE CategoryID = ?";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, categoryId);
+
+            int rowsDeleted = stmt.executeUpdate();
+            System.out.println("Deleted " + rowsDeleted + " category(s).");
+
+        } catch (SQLException e) {
+            System.out.println("Delete failed: " + e.getMessage());
         }
     }
 }
