@@ -220,7 +220,12 @@ public class ModelClasses {
             price = p;
             modifiedAt = LocalDateTime.now();
         }
-
+        public void setCreatedAt(LocalDateTime createdAt) {
+            this.createdAt = createdAt;
+        }
+        public LocalDateTime getCreatedAt() {
+            return createdAt; 
+        }
         public int getStock() {
             return stock; }
         public void setStock(int s) {
