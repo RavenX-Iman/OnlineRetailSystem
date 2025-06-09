@@ -5,71 +5,82 @@ import onlineretailsystem.ModelClasses.Category;
 
 import java.math.BigDecimal;
 import java.sql.*;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class ProductDAO {
+    private final Connection conn;
+    private final CategoryDAO categoryDAO;
 
-    private CategoryDAO categoryDAO = new CategoryDAO();
-    //get all products
-    
-    public List<Product> getAllProducts() {
-        
-    List<Product> products = new ArrayList<>();
-    String sql = "SELECT * FROM Products_table";
-
-    // Step 1: Load all categories once into a Map
-    List<Category> categories = categoryDAO.getAllCategories(); // You must have this method implemented
-    Map<Integer, Category> categoryMap = new HashMap<>();
-    for (Category cat : categories) {
-        categoryMap.put(cat.getCategoryId(), cat);
+    // Constructor with shared Connection and CategoryDAO
+    public ProductDAO(Connection conn) {
+        this.conn = conn;
+        this.categoryDAO = new CategoryDAO(conn);
     }
 
-    // Step 2: Fetch products using a single DB connection
-    
-    try (Connection conn = DBConnection.getConnection();
-         PreparedStatement stmt = conn.prepareStatement(sql);
-         ResultSet rs = stmt.executeQuery()) {
+    // Get all products
+    public List<Product> getAllProducts() {
+        List<Product> products = new ArrayList<>();
+        String sql = "SELECT * FROM Products_table";
 
-        while (rs.next()) {
-            int productId = rs.getInt("ProductID");
-            String productName = rs.getString("ProductName");
-            int categoryId = rs.getInt("CategoryID");
-            BigDecimal price = rs.getBigDecimal("Price");
-            int stock = rs.getInt("Stock");
-            Timestamp createdAt = rs.getTimestamp("createdat");
+        // Load categories into a Map
+        List<Category> categories = categoryDAO.getAllCategories();
+        Map<Integer, Category> categoryMap = new HashMap<>();
+        for (Category cat : categories) {
+            categoryMap.put(cat.getCategoryId(), cat);
+        }
 
-            // Get category from cache instead of making a new DB call
-            Category category = categoryMap.get(categoryId);
-            if (category == null) {
-                System.out.println("Warning: Category not found for ID: " + categoryId);
-                continue; // Skip this product or handle appropriately
+        try (PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                int productId = rs.getInt("ProductID");
+                String productName = rs.getString("ProductName");
+                int categoryId = rs.getInt("CategoryID");
+                BigDecimal price = rs.getBigDecimal("Price");
+                int stock = rs.getInt("Stock");
+                Timestamp createdAt = rs.getTimestamp("createdat");
+
+                Category category = categoryMap.get(categoryId);
+                if (category == null) {
+                    System.out.println("Warning: Category not found for ID: " + categoryId);
+                    continue;
+                }
+
+                Product product = new Product(productName, category, price, stock);
+                product.setProductId(productId);
+                product.setCreatedAt(createdAt.toLocalDateTime());
+
+                products.add(product);
             }
 
-            Product product = new Product(productName, category, price, stock);
-            product.setProductId(productId);
-            product.setCreatedAt(createdAt.toLocalDateTime());
-
-            products.add(product);
-        }
-
         } catch (SQLException e) {
-        System.out.println("Error fetching products: " + e.getMessage());
+            DBErrorHandler.handle(e, "retrieve products");
         }
 
-    return products;
+        return products;
     }
 
+    // Check if a product with the same name and category already exists
+    public boolean productExists(String name, int categoryId) {
+        String sql = "SELECT COUNT(*) FROM Products_table WHERE ProductName = ? AND CategoryID = ?";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, name);
+            stmt.setInt(2, categoryId);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1) > 0;
+            }
+        } catch (SQLException e) {
+            DBErrorHandler.handle(e, "check if product exists");
+        }
+        return false;
+    }
 
     // Insert a new product
     public void insertProduct(Product product) {
         String sql = "INSERT INTO Products_table (ProductName, CategoryID, Price, Stock) VALUES (?, ?, ?, ?)";
 
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+        try (PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             stmt.setString(1, product.getProductName());
             stmt.setInt(2, product.getCategory().getCategoryId());
@@ -80,15 +91,14 @@ public class ProductDAO {
             if (rows > 0) {
                 try (ResultSet keys = stmt.getGeneratedKeys()) {
                     if (keys.next()) {
-                        product.setProductId(keys.getInt(1));  // Set the generated ID
+                        product.setProductId(keys.getInt(1));
                     }
                 }
+                System.out.println("Inserted " + rows + " product(s).");
             }
 
-            System.out.println("Inserted " + rows + " product(s).");
-
         } catch (SQLException e) {
-            System.out.println("Insert failed: " + e.getMessage());
+            DBErrorHandler.handle(e, "insert product");
         }
     }
 
@@ -96,9 +106,7 @@ public class ProductDAO {
     public Product getProductById(int id) {
         String sql = "SELECT * FROM Products_table WHERE ProductID = ?";
 
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, id);
 
             try (ResultSet rs = stmt.executeQuery()) {
@@ -110,7 +118,6 @@ public class ProductDAO {
                     Timestamp createdAt = rs.getTimestamp("createdat");
 
                     Category category = categoryDAO.getCategoryById(categoryId);
-
                     Product product = new Product(productName, category, price, stock);
                     product.setProductId(id);
                     product.setCreatedAt(createdAt.toLocalDateTime());
@@ -120,19 +127,17 @@ public class ProductDAO {
             }
 
         } catch (SQLException e) {
-            System.out.println("Error fetching product: " + e.getMessage());
+            DBErrorHandler.handle(e, "fetch product by ID");
         }
 
         return null;
     }
 
-    // Update existing product
+    // Update product
     public void updateProduct(Product product) {
         String sql = "UPDATE Products_table SET ProductName = ?, CategoryID = ?, Price = ?, Stock = ? WHERE ProductID = ?";
 
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, product.getProductName());
             stmt.setInt(2, product.getCategory().getCategoryId());
             stmt.setBigDecimal(3, product.getPrice());
@@ -143,7 +148,7 @@ public class ProductDAO {
             System.out.println("Updated " + rows + " product(s).");
 
         } catch (SQLException e) {
-            System.out.println("Update failed: " + e.getMessage());
+            DBErrorHandler.handle(e, "update product");
         }
     }
 
@@ -151,16 +156,18 @@ public class ProductDAO {
     public void deleteProduct(int productId) {
         String sql = "DELETE FROM Products_table WHERE ProductID = ?";
 
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, productId);
 
             int rows = stmt.executeUpdate();
-            System.out.println("Deleted " + rows + " product(s).");
+            if (rows > 0) {
+                System.out.println("Deleted " + rows + " product(s).");
+            } else {
+                System.out.println("No product found with ID: " + productId);
+            }
 
         } catch (SQLException e) {
-            System.out.println("Delete failed: " + e.getMessage());
+            DBErrorHandler.handle(e, "delete product");
         }
     }
 }

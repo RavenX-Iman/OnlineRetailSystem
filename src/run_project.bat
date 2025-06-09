@@ -13,10 +13,16 @@ onlineretailsystem\CustomerDAO.java ^
 onlineretailsystem\CategoryDAO.java ^
 onlineretailsystem\ProductDAO.java ^
 onlineretailsystem\OrderDAO.java ^
+onlineretailsystem\OrderItemDAO.java ^
+onlineretailsystem\PaymentDAO.java ^
+onlineretailsystem\InventoryTransactionDAO.java ^
 onlineretailsystem\TestCustomerDAO.java ^
 onlineretailsystem\TestCategoryDAO.java ^
 onlineretailsystem\TestProductDAO.java ^
-onlineretailsystem\TestOrderDAO.java
+onlineretailsystem\TestOrderDAO.java ^
+onlineretailsystem\TestOrderItemDAO.java ^
+onlineretailsystem\TestPaymentDAO.java ^
+onlineretailsystem\TestInventoryTransactionDAO.java
 
 if %ERRORLEVEL% NEQ 0 (
     echo.
@@ -28,24 +34,21 @@ if %ERRORLEVEL% NEQ 0 (
 echo.
 echo Compilation successful.
 
-echo Running TestCustomerDAO...
-echo.
-java -cp "%CLASSPATH%;." onlineretailsystem.TestCustomerDAO
-echo.
-
-echo Running TestCategoryDAO...
-echo.
-java -cp "%CLASSPATH%;." onlineretailsystem.TestCategoryDAO
-echo.
-
-echo Running TestProductDAO...
-echo.
-java -cp "%CLASSPATH%;." onlineretailsystem.TestProductDAO
-echo.
-
-echo Running TestOrderDAO...
-echo.
-java -cp "%CLASSPATH%;." onlineretailsystem.TestOrderDAO
-echo.
+:: Run all test classes
+for %%F in (
+    TestCustomerDAO
+    TestCategoryDAO
+    TestProductDAO
+    TestOrderDAO
+    TestOrderItemDAO
+    TestPaymentDAO
+    TestInventoryTransactionDAO
+) do (
+    echo Running %%F...
+    java -cp "%CLASSPATH%;." onlineretailsystem.%%F
+    echo.
+)
 
 pause
+echo All tests completed.
+exit /b 0

@@ -2,6 +2,10 @@ package onlineretailsystem;
 import java.time.LocalDateTime;
 import java.math.BigDecimal;
 import java.util.List;
+
+import onlineretailsystem.ModelClasses.Order;
+import onlineretailsystem.ModelClasses.Payment.PaymentMethod;
+
 import java.util.ArrayList;
 
 
@@ -184,6 +188,11 @@ public class ModelClasses {
         private LocalDateTime createdAt;
         private String createdBy;
         private LocalDateTime modifiedAt;
+        
+        public Product() {
+    // Optional: initialize fields if needed
+}
+
 
         public Product(String productName, Category category, BigDecimal price, int stock) {
             this.productId = 0; // default or auto-generated
@@ -360,103 +369,156 @@ public class ModelClasses {
                     ", status=" + status + '}';
         }
     }
-    public static class OrderItem {
-        private int orderItemId;
-        private Order order;
-        private Product productName;
-        private int quantity;
-        private BigDecimal price;
 
-        public OrderItem(){
+   public static class OrderItem {
+    private int orderItemId;
+    private Order order;
+    private Product product; // Renamed from productName
+    private int quantity;
+    private BigDecimal price;
+    
 
-        }
+    public OrderItem() {
+        // Default constructor
+    }
 
-        public OrderItem(Order o, Product p, int q) {
-            order = o;
-            productName = p;
-            quantity = q;
-            price = productName.getPrice(); // Capture price at time of order
-        }
+    public OrderItem(Order o, Product p, int q) {
+        this.order = o;
+        this.product = p;
+        this.quantity = q;
+        this.price = product.getPrice(); // Capture price at time of order
+    }
 
-        // Getters and Setters
+    // Getters and Setters
 
-        public void setOrderItemId(int id) {
-            orderItemId = id; }
-        public int getOrderItemId() {
-            return orderItemId; }
+    public int getOrderItemId() {
+        return orderItemId;
+    }
 
-        public Order getOrder() { return order; }
-        // Add this method:
+    public void setOrderItemId(int id) {
+        this.orderItemId = id;
+    }
 
-        public void setOrder(Order order) {
+    public Order getOrder() {
+        return order;
+    }
+
+    public void setOrder(Order order) {
         this.order = order;
     }
 
-        public void setProductName(Product p) {
-            productName = p; 
-        }
-        public Product getProductName() { return productName; }
-
-        public void setQuantity(int q) { quantity = q; }
-        public int getQuantity() { return quantity; }
-
-        public void setPrice(BigDecimal p) { price = p; }
-        public BigDecimal getPrice() { return price; }
-
-        public BigDecimal getSubTotal() {
-            return price.multiply(BigDecimal.valueOf(quantity));
-        }
-
-        @Override
-        public String toString() {
-            return "OrderItem{" +
-                    "product=" + productName.getProductName() +
-                    ", quantity=" + quantity +
-                    ", price=" + price +
-                    ", subtotal=" + getSubTotal() +
-                    '}';
-        }
+    public Product getProduct() {
+        return product;
     }
 
+    public void setProduct(Product p) {
+        this.product = p;
+    }
+
+    public int getQuantity() {
+        return quantity;
+    }
+
+    public void setQuantity(int q) {
+        this.quantity = q;
+    }
+
+    public BigDecimal getPrice() {
+        return price;
+    }
+
+    public void setPrice(BigDecimal p) {
+        this.price = p;
+    }
+
+    public BigDecimal getSubTotal() {
+        return price.multiply(BigDecimal.valueOf(quantity));
+    }
+
+    @Override
+    public String toString() {
+        return "OrderItem{" +
+                "product=" + product.getProductName() +
+                ", quantity=" + quantity +
+                ", price=" + price +
+                ", subtotal=" + getSubTotal() +
+                '}';
+    }
+}
+
     public static class Payment {
-        public enum PaymentMethod {
-            CASH_ON_DELIVERY, CREDIT_CARD, DEBIT_CARD, BANK_TRANSFER, JAZZCASH, EASYPAISA
-        }
+    public enum PaymentMethod {
+        CASH_ON_DELIVERY, CREDIT_CARD, DEBIT_CARD, BANK_TRANSFER, JAZZCASH, EASYPAISA
+    }
 
-        private int paymentId;
-        private Order order;
-        private BigDecimal amount;
-        private PaymentMethod paymentMethod;
-        private String transactionId;
-        private LocalDateTime paymentDate;
+    private int paymentId;
+    private Order order;
+    private BigDecimal amount;
+    private PaymentMethod paymentMethod;
+    private String transactionId;
+    private LocalDateTime paymentDate;
 
-        public Payment(){
+    public Payment() {
+        // default constructor
+    }
 
-        }
+    public Payment(Order order, BigDecimal amount, PaymentMethod paymentMethod) {
+        this.order = order;
+        this.amount = amount;
+        this.paymentMethod = paymentMethod;
+        this.paymentDate = LocalDateTime.now();
+    }
 
-        public Payment(Order o, BigDecimal a, PaymentMethod pm) {
-            order = o;
-            amount = a;
-            paymentMethod = pm;
-            paymentDate = LocalDateTime.now();
-        }
+    // Getters and Setters
 
-        // Setters and Getters using short-form
-        public void setPaymentId(int id) { paymentId = id; }
-        public int getPaymentId() { return paymentId; }
+    public int getPaymentId() {
+        return paymentId;
+    }
 
-        public Order getOrder() { return order; }
+    public void setPaymentId(int paymentId) {
+        this.paymentId = paymentId;
+    }
 
-        public BigDecimal getAmount() { return amount; }
+    public Order getOrder() {
+        return order;
+    }
 
-        public PaymentMethod getPaymentMethod() { return paymentMethod; }
+    public void setOrder(Order order) {
+        this.order = order;
+    }
 
-        public void setTransactionId(String tid) { transactionId = tid; }
-        public String getTransactionId() { return transactionId; }
+    public BigDecimal getAmount() {
+        return amount;
+    }
 
-        public LocalDateTime getPaymentDate() { return paymentDate; }
+    public void setAmount(BigDecimal amount) {
+        this.amount = amount;
+    }
 
-        @Override
+    public PaymentMethod getPaymentMethod() {
+        return paymentMethod;
+    }
+
+    public void setPaymentMethod(PaymentMethod paymentMethod) {
+        this.paymentMethod = paymentMethod;
+    }
+
+    public String getTransactionId() {
+        return transactionId;
+    }
+
+    public void setTransactionId(String transactionId) {
+        this.transactionId = transactionId;
+    }
+
+    public LocalDateTime getPaymentDate() {
+        return paymentDate;
+    }
+
+    public void setPaymentDate(LocalDateTime paymentDate) {
+        this.paymentDate = paymentDate;
+    }
+   @Override
         public String toString() {
             return "Payment{" +
                     "paymentId=" + paymentId +

@@ -3,6 +3,7 @@ package onlineretailsystem;
 import onlineretailsystem.ModelClasses.OrderItem;
 import onlineretailsystem.ModelClasses.Order;
 import onlineretailsystem.ModelClasses.Product;
+
 import java.math.BigDecimal;
 import java.sql.*;
 import java.util.ArrayList;
@@ -10,7 +11,6 @@ import java.util.List;
 
 public class OrderItemDAO {
 
-    // Default constructor - consistent with other DAOs
     public OrderItemDAO() {
         // Default constructor
     }
@@ -20,9 +20,9 @@ public class OrderItemDAO {
         String sql = "INSERT INTO OrderItems_table (OrderID, ProductID, Quantity, Price) VALUES (?, ?, ?, ?)";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            
+
             stmt.setInt(1, item.getOrder().getOrderId());
-            stmt.setInt(2, item.getProductName().getProductId());
+            stmt.setInt(2, item.getProduct().getProductId());
             stmt.setInt(3, item.getQuantity());
             stmt.setBigDecimal(4, item.getPrice());
 
@@ -34,7 +34,7 @@ public class OrderItemDAO {
                 }
             }
         } catch (SQLException e) {
-            System.out.println("Insert OrderItem failed: " + e.getMessage());
+            DBErrorHandler.handle(e, "insert order item");
         }
     }
 
@@ -42,10 +42,10 @@ public class OrderItemDAO {
     public List<OrderItem> getAllOrderItems() {
         String sql = "SELECT * FROM OrderItems_table";
         List<OrderItem> items = new ArrayList<>();
-        
+
         try (Connection conn = DBConnection.getConnection();
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
 
             while (rs.next()) {
                 OrderItem item = new OrderItem();
@@ -57,7 +57,7 @@ public class OrderItemDAO {
 
                 Product product = new Product();
                 product.setProductId(rs.getInt("ProductID"));
-                item.setProductName(product);
+                item.setProduct(product);
 
                 item.setQuantity(rs.getInt("Quantity"));
                 item.setPrice(rs.getBigDecimal("Price"));
@@ -65,7 +65,7 @@ public class OrderItemDAO {
                 items.add(item);
             }
         } catch (SQLException e) {
-            System.out.println("Get all OrderItems failed: " + e.getMessage());
+            DBErrorHandler.handle(e, "fetch all order items");
         }
         return items;
     }
@@ -75,23 +75,23 @@ public class OrderItemDAO {
         String sql = "DELETE FROM OrderItems_table WHERE OrderItemID = ?";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
-            
+
             stmt.setInt(1, orderItemId);
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
-            System.out.println("Delete OrderItem failed: " + e.getMessage());
+            DBErrorHandler.handle(e, "delete order item with ID " + orderItemId);
             return false;
         }
     }
 
-    // Get OrderItems by OrderID
+    // Get OrderItems by Order ID
     public List<OrderItem> getItemsByOrderId(int orderId) {
         String sql = "SELECT * FROM OrderItems_table WHERE OrderID = ?";
         List<OrderItem> items = new ArrayList<>();
-        
+
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
-            
+
             stmt.setInt(1, orderId);
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
@@ -102,9 +102,10 @@ public class OrderItemDAO {
                     order.setOrderId(rs.getInt("OrderID"));
                     item.setOrder(order);
 
-                    Product product = new Product();
-                    product.setProductId(rs.getInt("ProductID"));
-                    item.setProductName(product);
+                    int productId = rs.getInt("ProductID");
+                    ProductDAO productDAO = new ProductDAO(conn);
+                    Product product = productDAO.getProductById(productId);
+                    item.setProduct(product);
 
                     item.setQuantity(rs.getInt("Quantity"));
                     item.setPrice(rs.getBigDecimal("Price"));
@@ -113,7 +114,7 @@ public class OrderItemDAO {
                 }
             }
         } catch (SQLException e) {
-            System.out.println("Get OrderItems by OrderID failed: " + e.getMessage());
+            DBErrorHandler.handle(e, "fetch order items for order ID " + orderId);
         }
         return items;
     }
@@ -123,16 +124,16 @@ public class OrderItemDAO {
         String sql = "UPDATE OrderItems_table SET OrderID = ?, ProductID = ?, Quantity = ?, Price = ? WHERE OrderItemID = ?";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
-            
+
             stmt.setInt(1, item.getOrder().getOrderId());
-            stmt.setInt(2, item.getProductName().getProductId());
+            stmt.setInt(2, item.getProduct().getProductId());
             stmt.setInt(3, item.getQuantity());
             stmt.setBigDecimal(4, item.getPrice());
             stmt.setInt(5, item.getOrderItemId());
-            
+
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
-            System.out.println("Update OrderItem failed: " + e.getMessage());
+            DBErrorHandler.handle(e, "update order item with ID " + item.getOrderItemId());
             return false;
         }
     }

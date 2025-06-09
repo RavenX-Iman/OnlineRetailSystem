@@ -3,20 +3,22 @@ package onlineretailsystem;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.time.LocalDateTime;
-
 import onlineretailsystem.ModelClasses.Customer;
 
 public class CustomerDAO {
 
+    private final Connection conn;
+
+    public CustomerDAO(Connection conn) {
+        this.conn = conn;
+    }
+
     // Insert a customer into the database
-    public void insertCustomer(Customer customer) {
+    public boolean insertCustomer(Customer customer) {
         String sql = "INSERT INTO Customer_table (FirstName, LastName, Email, Phone, Address, City, State, PostalCode, Country) " +
                      "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, customer.getFirstName());
             stmt.setString(2, customer.getLastName());
             stmt.setString(3, customer.getEmail());
@@ -29,9 +31,11 @@ public class CustomerDAO {
 
             int rowsInserted = stmt.executeUpdate();
             System.out.println("Inserted " + rowsInserted + " customer(s).");
+            return rowsInserted > 0;
 
         } catch (SQLException e) {
-            System.out.println("Insert failed: " + e.getMessage());
+            DBErrorHandler.handle(e, "insert customer");
+            return false;
         }
     }
 
@@ -40,8 +44,7 @@ public class CustomerDAO {
         List<Customer> customers = new ArrayList<>();
         String sql = "SELECT * FROM Customer_table";
 
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql);
+        try (PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
 
             while (rs.next()) {
@@ -57,7 +60,6 @@ public class CustomerDAO {
                     rs.getString("Country")
                 );
 
-                // Set ID and createdAt
                 customer.setCustomerId(rs.getInt("CustomerID"));
                 Timestamp timestamp = rs.getTimestamp("createdat");
                 if (timestamp != null) {
@@ -68,7 +70,7 @@ public class CustomerDAO {
             }
 
         } catch (SQLException e) {
-            System.out.println("Query failed: " + e.getMessage());
+            DBErrorHandler.handle(e, "fetch all customers");
         }
 
         return customers;
@@ -77,8 +79,8 @@ public class CustomerDAO {
     // Get customer by ID
     public Customer getCustomerById(int customerId) {
         String sql = "SELECT * FROM Customer_table WHERE CustomerID = ?";
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, customerId);
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
@@ -102,8 +104,9 @@ public class CustomerDAO {
                 }
             }
         } catch (SQLException e) {
-            System.out.println("Get by ID failed: " + e.getMessage());
+            DBErrorHandler.handle(e, "get customer by ID");
         }
+
         return null;
     }
 
@@ -112,9 +115,7 @@ public class CustomerDAO {
         String sql = "UPDATE Customer_table SET FirstName = ?, LastName = ?, Email = ?, Phone = ?, " +
                      "Address = ?, City = ?, State = ?, PostalCode = ?, Country = ? WHERE CustomerID = ?";
 
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, customer.getFirstName());
             stmt.setString(2, customer.getLastName());
             stmt.setString(3, customer.getEmail());
@@ -130,7 +131,7 @@ public class CustomerDAO {
             System.out.println("Updated " + rowsUpdated + " customer(s).");
 
         } catch (SQLException e) {
-            System.out.println("Update failed: " + e.getMessage());
+            DBErrorHandler.handle(e, "update customer");
         }
     }
 
@@ -138,16 +139,18 @@ public class CustomerDAO {
     public void deleteCustomer(int customerId) {
         String sql = "DELETE FROM Customer_table WHERE CustomerID = ?";
 
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, customerId);
 
             int rowsDeleted = stmt.executeUpdate();
-            System.out.println("Deleted " + rowsDeleted + " customer(s).");
+            if (rowsDeleted > 0) {
+                System.out.println("Deleted " + rowsDeleted + " customer(s).");
+            } else {
+                System.out.println("No customer found with ID: " + customerId);
+            }
 
         } catch (SQLException e) {
-            System.out.println("Delete failed: " + e.getMessage());
+            DBErrorHandler.handle(e, "delete customer");
         }
     }
 }
