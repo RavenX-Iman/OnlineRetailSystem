@@ -290,6 +290,7 @@ public class ModelClasses {
         private OrderStatus status;
         private List<OrderItem> orderItems;
         private Payment payment;
+        
 
         public Order(){
 
@@ -385,9 +386,14 @@ public class ModelClasses {
             return orderItemId; }
 
         public Order getOrder() { return order; }
+        // Add this method:
 
-        public void setProductName(String p) {
-            productName = productName;
+        public void setOrder(Order order) {
+        this.order = order;
+    }
+
+        public void setProductName(Product p) {
+            productName = p; 
         }
         public Product getProductName() { return productName; }
 

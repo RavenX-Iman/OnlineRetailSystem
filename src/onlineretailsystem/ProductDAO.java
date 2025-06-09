@@ -15,7 +15,9 @@ public class ProductDAO {
 
     private CategoryDAO categoryDAO = new CategoryDAO();
     //get all products
+    
     public List<Product> getAllProducts() {
+        
     List<Product> products = new ArrayList<>();
     String sql = "SELECT * FROM Products_table";
 
@@ -27,6 +29,7 @@ public class ProductDAO {
     }
 
     // Step 2: Fetch products using a single DB connection
+    
     try (Connection conn = DBConnection.getConnection();
          PreparedStatement stmt = conn.prepareStatement(sql);
          ResultSet rs = stmt.executeQuery()) {
@@ -41,6 +44,10 @@ public class ProductDAO {
 
             // Get category from cache instead of making a new DB call
             Category category = categoryMap.get(categoryId);
+            if (category == null) {
+                System.out.println("Warning: Category not found for ID: " + categoryId);
+                continue; // Skip this product or handle appropriately
+            }
 
             Product product = new Product(productName, category, price, stock);
             product.setProductId(productId);
