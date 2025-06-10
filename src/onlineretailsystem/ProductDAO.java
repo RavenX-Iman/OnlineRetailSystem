@@ -11,18 +11,15 @@ public class ProductDAO {
     private final Connection conn;
     private final CategoryDAO categoryDAO;
 
-    // Constructor with shared Connection and CategoryDAO
     public ProductDAO(Connection conn) {
         this.conn = conn;
         this.categoryDAO = new CategoryDAO(conn);
     }
 
-    // Get all products
     public List<Product> getAllProducts() {
         List<Product> products = new ArrayList<>();
         String sql = "SELECT * FROM Products_table";
 
-        // Load categories into a Map
         List<Category> categories = categoryDAO.getAllCategories();
         Map<Integer, Category> categoryMap = new HashMap<>();
         for (Category cat : categories) {
@@ -60,7 +57,6 @@ public class ProductDAO {
         return products;
     }
 
-    // Check if a product with the same name and category already exists
     public boolean productExists(String name, int categoryId) {
         String sql = "SELECT COUNT(*) FROM Products_table WHERE ProductName = ? AND CategoryID = ?";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -76,8 +72,7 @@ public class ProductDAO {
         return false;
     }
 
-    // Insert a new product
-    public void insertProduct(Product product) {
+    public boolean insertProduct(Product product) {
         String sql = "INSERT INTO Products_table (ProductName, CategoryID, Price, Stock) VALUES (?, ?, ?, ?)";
 
         try (PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -95,14 +90,15 @@ public class ProductDAO {
                     }
                 }
                 System.out.println("Inserted " + rows + " product(s).");
+                return true;
             }
 
         } catch (SQLException e) {
             DBErrorHandler.handle(e, "insert product");
         }
+        return false;
     }
 
-    // Get product by ID
     public Product getProductById(int id) {
         String sql = "SELECT * FROM Products_table WHERE ProductID = ?";
 
@@ -133,7 +129,6 @@ public class ProductDAO {
         return null;
     }
 
-    // Update product
     public void updateProduct(Product product) {
         String sql = "UPDATE Products_table SET ProductName = ?, CategoryID = ?, Price = ?, Stock = ? WHERE ProductID = ?";
 
@@ -152,7 +147,6 @@ public class ProductDAO {
         }
     }
 
-    // Delete product by ID
     public void deleteProduct(int productId) {
         String sql = "DELETE FROM Products_table WHERE ProductID = ?";
 

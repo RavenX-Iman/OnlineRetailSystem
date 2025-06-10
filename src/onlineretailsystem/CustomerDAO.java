@@ -153,4 +153,9 @@ public class CustomerDAO {
             DBErrorHandler.handle(e, "delete customer");
         }
     }
+
+    // Method to close the database connection
+    public void closeConnection() {
+        DBConnection.closeConnection(conn);
+    }
 }
