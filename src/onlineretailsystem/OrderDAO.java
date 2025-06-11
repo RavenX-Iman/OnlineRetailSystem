@@ -170,4 +170,13 @@ public class OrderDAO {
             return 0;
         }
     }
+    public void close() {
+        try {
+            if (conn != null && !conn.isClosed()) {
+                conn.close();
+            }
+        } catch (SQLException e) {
+            DBErrorHandler.handle(e, "close database connection in OrderDAO");
+        }
+    }
 }

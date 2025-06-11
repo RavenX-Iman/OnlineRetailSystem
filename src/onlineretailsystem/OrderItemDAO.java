@@ -10,9 +10,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class OrderItemDAO {
+        private Connection conn;
 
     public OrderItemDAO() {
         // Default constructor
+    }
+    
+    // Constructor that accepts a Connection
+    public OrderItemDAO(Connection conn) {
+        this.conn = conn;
     }
 
     // Insert a new OrderItem

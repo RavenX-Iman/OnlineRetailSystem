@@ -36,4 +36,8 @@ public class OrderService {
     public boolean updateOrderStatus(int orderId, String status) {
         return dao.updateOrderStatus(orderId, status) > 0;
     }
+
+    public void closeDAO() {
+        dao.close(); // Ensure to close the DAO connection
+    }
 }

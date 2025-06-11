@@ -8,7 +8,11 @@ import java.sql.Connection;
 import java.util.List;
 
 public class ProductService {
-    private final ProductDAO dao;
+    private  ProductDAO dao;
+     public ProductService() {
+        // Optional: initialize dependencies here
+    }
+
 
     // Constructor receives and passes Connection object
     public ProductService(Connection connection) {
@@ -37,4 +41,8 @@ public class ProductService {
             return false;
         }
     }
+      public void close() {
+        dao.closeDAO();
+    }
+    
 }

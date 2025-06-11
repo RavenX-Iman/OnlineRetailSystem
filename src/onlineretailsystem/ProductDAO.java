@@ -164,4 +164,13 @@ public class ProductDAO {
             DBErrorHandler.handle(e, "delete product");
         }
     }
+    public void closeDAO() {
+    try {
+        if (conn != null && !conn.isClosed()) {
+            conn.close();
+        }
+    } catch (SQLException e) {
+        DBErrorHandler.handle(e, "close ProductDAO");
+    }
+}
 }
