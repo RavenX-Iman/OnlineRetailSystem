@@ -20,17 +20,34 @@ public class Main {
                 // Create main application frame with dashboard
                 JFrame frame = new JFrame("Online Retail System");
                 frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-                frame.setSize(1000, 700);
+                frame.setSize(1200, 800);
                 frame.setLocationRelativeTo(null);
                 
-                // Add the dashboard panel
-                DashboardPanel dashboard = new DashboardPanel();
-                frame.add(dashboard);
+                // Create main panel with tabbed interface to access all panels
+                JTabbedPane tabbedPane = new JTabbedPane();
+                
+                // Add all your panels as tabs
+                tabbedPane.addTab("Dashboard", new DashboardPanel());
+                tabbedPane.addTab("Orders", new OrderPanel());
+                tabbedPane.addTab("Products", new ProductPanel());
+                tabbedPane.addTab("Payments", new PaymentPanel());
+                tabbedPane.addTab("Order Items", new OrderItemPanel());
+                tabbedPane.addTab("Inventory", new InventoryTransactionPanel());
+                tabbedPane.addTab("Categories", new CategoryPanel());
+                tabbedPane.addTab("Admin", new AdminPanel());
+                
+                // Style the tabbed pane
+                tabbedPane.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+                tabbedPane.setBackground(new Color(245, 248, 255));
+                
+                frame.add(tabbedPane);
                 
                 // Make frame visible
                 frame.setVisible(true);
                 
                 System.out.println("Online Retail System GUI launched successfully!");
+                System.out.println("All panels are now accessible through tabs!");
+                
             } catch (Exception e) {
                 System.err.println("Error launching GUI: " + e.getMessage());
                 e.printStackTrace();

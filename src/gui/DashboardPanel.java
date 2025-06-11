@@ -2,10 +2,11 @@ package gui;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
-import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -14,179 +15,225 @@ public class DashboardPanel extends JPanel {
     private Timer timer;
     
     public DashboardPanel() {
-        setLayout(new BorderLayout(10, 10));
-        setBorder(new EmptyBorder(20, 20, 20, 20));
-        setBackground(Color.WHITE);
+        setLayout(new BorderLayout(15, 15));
+        setBackground(ModernColors.BACKGROUND);
+        setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
         
-        initializeComponents();
+        add(createHeader(), BorderLayout.NORTH);
+        add(createMainContent(), BorderLayout.CENTER);
+        add(createFooterSection(), BorderLayout.SOUTH);
+        
         startClock();
     }
     
-    private void initializeComponents() {
-        // Header Panel
-        JPanel headerPanel = createHeaderPanel();
-        add(headerPanel, BorderLayout.NORTH);
+    private JPanel createHeader() {
+        JPanel header = new JPanel(new BorderLayout());
+        header.setBackground(ModernColors.PRIMARY);
+        header.setBorder(BorderFactory.createEmptyBorder(25, 30, 25, 30));
+
+        JPanel titlePanel = new JPanel(new BorderLayout());
+        titlePanel.setBackground(ModernColors.PRIMARY);
         
-        // Main Content Panel
-        JPanel mainPanel = createMainContentPanel();
-        add(mainPanel, BorderLayout.CENTER);
+        JLabel title = new JLabel("🏪 Retail System Dashboard");
+        title.setFont(new Font("Segoe UI", Font.BOLD, 28));
+        title.setForeground(Color.WHITE);
+        titlePanel.add(title, BorderLayout.NORTH);
         
-        // Footer Panel
-        JPanel footerPanel = createFooterPanel();
-        add(footerPanel, BorderLayout.SOUTH);
-    }
-    
-    private JPanel createHeaderPanel() {
-        JPanel headerPanel = new JPanel(new BorderLayout());
-        headerPanel.setBackground(new Color(52, 73, 94));
-        headerPanel.setBorder(new EmptyBorder(15, 20, 15, 20));
+        JLabel subtitle = new JLabel("Welcome back! Here's what's happening with your store today.");
+        subtitle.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        subtitle.setForeground(new Color(200, 200, 255));
+        subtitle.setBorder(BorderFactory.createEmptyBorder(8, 0, 0, 0));
+        titlePanel.add(subtitle, BorderLayout.SOUTH);
         
-        // Welcome Label
-        JLabel welcomeLabel = new JLabel("Online Retail System Dashboard");
-        welcomeLabel.setFont(new Font("Arial", Font.BOLD, 24));
-        welcomeLabel.setForeground(Color.WHITE);
-        headerPanel.add(welcomeLabel, BorderLayout.WEST);
+        header.add(titlePanel, BorderLayout.WEST);
         
-        // Time Label
+        // Time display
         timeLabel = new JLabel();
-        timeLabel.setFont(new Font("Arial", Font.PLAIN, 14));
+        timeLabel.setFont(new Font("Segoe UI", Font.PLAIN, 16));
         timeLabel.setForeground(Color.WHITE);
-        headerPanel.add(timeLabel, BorderLayout.EAST);
+        timeLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+        header.add(timeLabel, BorderLayout.EAST);
         
-        return headerPanel;
+        return header;
     }
     
-    private JPanel createMainContentPanel() {
-        JPanel mainPanel = new JPanel(new GridLayout(2, 2, 15, 15));
-        mainPanel.setBackground(Color.WHITE);
+    private JPanel createMainContent() {
+        JPanel main = new JPanel(new BorderLayout(0, 20));
+        main.setBackground(ModernColors.BACKGROUND);
         
-        // Statistics Cards
-        mainPanel.add(createStatisticsCard("Total Customers", "1,245", new Color(52, 152, 219)));
-        mainPanel.add(createStatisticsCard("Total Products", "892", new Color(46, 204, 113)));
-        mainPanel.add(createStatisticsCard("Pending Orders", "67", new Color(241, 196, 15)));
-        mainPanel.add(createStatisticsCard("Total Revenue", "$45,230", new Color(155, 89, 182)));
+        // Statistics cards
+        JPanel statsPanel = new JPanel(new GridLayout(2, 2, 20, 20));
+        statsPanel.setBackground(ModernColors.BACKGROUND);
         
-        return mainPanel;
+        statsPanel.add(createStatCard("👥 Total Customers", "1,245", "+12 today", ModernColors.SUCCESS));
+        statsPanel.add(createStatCard("📦 Total Products", "892", "+5 this week", ModernColors.INFO));
+        statsPanel.add(createStatCard("⏳ Pending Orders", "67", "Needs attention", ModernColors.WARNING));
+        statsPanel.add(createStatCard("💰 Total Revenue", "$45,230", "+8.5% this month", ModernColors.PRIMARY));
+        
+        main.add(statsPanel, BorderLayout.NORTH);
+        
+        // Quick actions
+        JPanel actionsPanel = createQuickActionsPanel();
+        main.add(actionsPanel, BorderLayout.CENTER);
+        
+        return main;
     }
     
-    private JPanel createStatisticsCard(String title, String value, Color color) {
+    private JPanel createStatCard(String title, String value, String subtitle, Color accentColor) {
         JPanel card = new JPanel(new BorderLayout());
         card.setBackground(Color.WHITE);
         card.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(color, 2),
-            new EmptyBorder(20, 20, 20, 20)
+            BorderFactory.createLineBorder(ModernColors.BORDER, 1),
+            BorderFactory.createEmptyBorder(25, 25, 25, 25)
         ));
         
-        // Title
+        // Title with icon
         JLabel titleLabel = new JLabel(title);
-        titleLabel.setFont(new Font("Arial", Font.PLAIN, 14));
-        titleLabel.setForeground(Color.GRAY);
+        titleLabel.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        titleLabel.setForeground(ModernColors.TEXT_SECONDARY);
         card.add(titleLabel, BorderLayout.NORTH);
         
-        // Value
+        // Main value
         JLabel valueLabel = new JLabel(value);
-        valueLabel.setFont(new Font("Arial", Font.BOLD, 28));
-        valueLabel.setForeground(color);
-        valueLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        valueLabel.setFont(new Font("Segoe UI", Font.BOLD, 32));
+        valueLabel.setForeground(accentColor);
+        valueLabel.setBorder(BorderFactory.createEmptyBorder(10, 0, 5, 0));
         card.add(valueLabel, BorderLayout.CENTER);
         
-        // Icon area (placeholder)
-        JLabel iconLabel = new JLabel("📊");
-        iconLabel.setFont(new Font("Arial", Font.PLAIN, 20));
-        iconLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-        card.add(iconLabel, BorderLayout.EAST);
+        // Subtitle
+        JLabel subLabel = new JLabel(subtitle);
+        subLabel.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        subLabel.setForeground(ModernColors.TEXT_SECONDARY);
+        card.add(subLabel, BorderLayout.SOUTH);
+        
+        // Hover effect
+        card.addMouseListener(new MouseAdapter() {
+            public void mouseEntered(MouseEvent e) {
+                card.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createLineBorder(accentColor, 2),
+                    BorderFactory.createEmptyBorder(24, 24, 24, 24)
+                ));
+                card.setCursor(new Cursor(Cursor.HAND_CURSOR));
+            }
+            public void mouseExited(MouseEvent e) {
+                card.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createLineBorder(ModernColors.BORDER, 1),
+                    BorderFactory.createEmptyBorder(25, 25, 25, 25)
+                ));
+                card.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+            }
+        });
         
         return card;
     }
     
-    private JPanel createFooterPanel() {
-        JPanel footerPanel = new JPanel(new BorderLayout());
-        footerPanel.setBackground(Color.WHITE);
-        footerPanel.setBorder(new EmptyBorder(10, 0, 0, 0));
-        
-        // Quick Actions Panel
-        JPanel quickActionsPanel = createQuickActionsPanel();
-        footerPanel.add(quickActionsPanel, BorderLayout.CENTER);
-        
-        // Recent Activity Panel
-        JPanel activityPanel = createRecentActivityPanel();
-        footerPanel.add(activityPanel, BorderLayout.SOUTH);
-        
-        return footerPanel;
-    }
-    
     private JPanel createQuickActionsPanel() {
-        JPanel actionsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        actionsPanel.setBackground(Color.WHITE);
-        actionsPanel.setBorder(new TitledBorder("Quick Actions"));
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBackground(Color.WHITE);
+        panel.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(ModernColors.BORDER, 1),
+            BorderFactory.createEmptyBorder(25, 30, 25, 30)
+        ));
         
-        // Quick action buttons
-        JButton addCustomerBtn = createActionButton("Add Customer", new Color(52, 152, 219));
-        JButton addProductBtn = createActionButton("Add Product", new Color(46, 204, 113));
-        JButton viewOrdersBtn = createActionButton("View Orders", new Color(241, 196, 15));
-        JButton reportsBtn = createActionButton("Generate Report", new Color(155, 89, 182));
+        JLabel actionTitle = new JLabel("⚡ Quick Actions");
+        actionTitle.setFont(new Font("Segoe UI", Font.BOLD, 18));
+        actionTitle.setForeground(ModernColors.TEXT_PRIMARY);
+        actionTitle.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0));
+        panel.add(actionTitle, BorderLayout.NORTH);
         
-        actionsPanel.add(addCustomerBtn);
-        actionsPanel.add(addProductBtn);
-        actionsPanel.add(viewOrdersBtn);
-        actionsPanel.add(reportsBtn);
+        JPanel buttonsPanel = new JPanel(new GridLayout(2, 2, 15, 15));
+        buttonsPanel.setBackground(Color.WHITE);
         
-        return actionsPanel;
+        buttonsPanel.add(createActionButton("👤 Add Customer", "Register new customers", ModernColors.SUCCESS));
+        buttonsPanel.add(createActionButton("📦 Add Product", "Expand your inventory", ModernColors.INFO));
+        buttonsPanel.add(createActionButton("📋 View Orders", "Manage customer orders", ModernColors.WARNING));
+        buttonsPanel.add(createActionButton("📊 Reports", "Generate business insights", ModernColors.PRIMARY));
+        
+        panel.add(buttonsPanel, BorderLayout.CENTER);
+        return panel;
     }
     
-    private JButton createActionButton(String text, Color color) {
-        JButton button = new JButton(text);
-        button.setBackground(color);
-        button.setForeground(Color.BLACK);
-        button.setFont(new Font("Arial", Font.BOLD, 12));
-        button.setBorder(BorderFactory.createEmptyBorder(10, 15, 10, 15));
+    private JButton createActionButton(String title, String description, Color color) {
+        JButton button = new JButton();
+        button.setLayout(new BorderLayout());
+        button.setBackground(color.brighter().brighter());
+        button.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(color, 2),
+            BorderFactory.createEmptyBorder(15, 20, 15, 20)
+        ));
         button.setFocusPainted(false);
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
         
-        // Add hover effect
-        button.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseEntered(java.awt.event.MouseEvent evt) {
-                button.setBackground(color.darker());
-            }
-            public void mouseExited(java.awt.event.MouseEvent evt) {
+        JLabel titleLabel = new JLabel(title);
+        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        titleLabel.setForeground(color.darker());
+        button.add(titleLabel, BorderLayout.NORTH);
+        
+        JLabel descLabel = new JLabel(description);
+        descLabel.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        descLabel.setForeground(ModernColors.TEXT_SECONDARY);
+        descLabel.setBorder(BorderFactory.createEmptyBorder(5, 0, 0, 0));
+        button.add(descLabel, BorderLayout.SOUTH);
+        
+        // Hover effects
+        button.addMouseListener(new MouseAdapter() {
+            public void mouseEntered(MouseEvent e) {
                 button.setBackground(color);
+                titleLabel.setForeground(Color.WHITE);
+                descLabel.setForeground(new Color(220, 220, 220));
+            }
+            public void mouseExited(MouseEvent e) {
+                button.setBackground(color.brighter().brighter());
+                titleLabel.setForeground(color.darker());
+                descLabel.setForeground(ModernColors.TEXT_SECONDARY);
             }
         });
         
-        // Add click action (placeholder)
-        button.addActionListener(e -> {
+        button.addActionListener(e -> 
             JOptionPane.showMessageDialog(this, 
-                "This will navigate to " + text + " functionality", 
+                "Navigate to " + title.substring(2) + " section", 
                 "Quick Action", 
-                JOptionPane.INFORMATION_MESSAGE);
-        });
+                JOptionPane.INFORMATION_MESSAGE));
         
         return button;
     }
     
-    private JPanel createRecentActivityPanel() {
-        JPanel activityPanel = new JPanel(new BorderLayout());
-        activityPanel.setBackground(Color.WHITE);
-        activityPanel.setBorder(new TitledBorder("Recent Activity"));
-        activityPanel.setPreferredSize(new Dimension(0, 120));
+    private JPanel createFooterSection() {
+        JPanel footer = new JPanel(new BorderLayout());
+        footer.setBackground(Color.WHITE);
+        footer.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(ModernColors.BORDER, 1),
+            BorderFactory.createEmptyBorder(20, 25, 20, 25)
+        ));
+        
+        JLabel activityTitle = new JLabel("📈 Recent Activity");
+        activityTitle.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        activityTitle.setForeground(ModernColors.TEXT_PRIMARY);
+        activityTitle.setBorder(BorderFactory.createEmptyBorder(0, 0, 15, 0));
+        footer.add(activityTitle, BorderLayout.NORTH);
         
         // Activity list
         DefaultListModel<String> listModel = new DefaultListModel<>();
-        listModel.addElement("🛒 New order #1234 received from John Doe");
-        listModel.addElement("📦 Product 'Laptop Pro' added to inventory");
-        listModel.addElement("👤 New customer registration: Jane Smith");
-        listModel.addElement("💰 Payment processed for order #1233");
-        listModel.addElement("📊 Daily sales report generated");
+        listModel.addElement("🛒 New order #1234 received from John Doe - 2 minutes ago");
+        listModel.addElement("📦 Product 'Wireless Headphones' added to inventory - 15 minutes ago");
+        listModel.addElement("👤 New customer registration: Jane Smith - 1 hour ago");
+        listModel.addElement("💰 Payment of $299.99 processed for order #1233 - 2 hours ago");
+        listModel.addElement("📊 Daily sales report generated successfully - 3 hours ago");
         
         JList<String> activityList = new JList<>(listModel);
-        activityList.setFont(new Font("Arial", Font.PLAIN, 12));
-        activityList.setBackground(new Color(248, 249, 250));
+        activityList.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        activityList.setBackground(ModernColors.BACKGROUND);
+        activityList.setSelectionBackground(new Color(240, 245, 255));
+        activityList.setSelectionForeground(ModernColors.TEXT_PRIMARY);
+        activityList.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
         
         JScrollPane scrollPane = new JScrollPane(activityList);
-        scrollPane.setPreferredSize(new Dimension(0, 100));
-        activityPanel.add(scrollPane, BorderLayout.CENTER);
+        scrollPane.setPreferredSize(new Dimension(0, 120));
+        scrollPane.setBorder(BorderFactory.createLineBorder(ModernColors.BORDER));
+        scrollPane.getViewport().setBackground(ModernColors.BACKGROUND);
+        footer.add(scrollPane, BorderLayout.CENTER);
         
-        return activityPanel;
+        return footer;
     }
     
     private void startClock() {
@@ -197,15 +244,14 @@ public class DashboardPanel extends JPanel {
             }
         });
         timer.start();
-        updateTime(); // Initial update
+        updateTime();
     }
     
     private void updateTime() {
-        SimpleDateFormat sdf = new SimpleDateFormat("MMM dd, yyyy - HH:mm:ss");
+        SimpleDateFormat sdf = new SimpleDateFormat("EEEE, MMM dd, yyyy • HH:mm:ss");
         timeLabel.setText(sdf.format(new Date()));
     }
     
-    // Clean up timer when panel is no longer needed
     @Override
     public void removeNotify() {
         super.removeNotify();

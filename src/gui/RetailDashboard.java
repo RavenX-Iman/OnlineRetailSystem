@@ -2,82 +2,125 @@ package gui;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-
-import gui.CustomerPanel;
-import gui.ProductPanel;
-import gui.ProductPanel;
-import gui.OrderPanel;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 public class RetailDashboard extends JFrame {
-
     public RetailDashboard() {
-        // Set title and window size
         setTitle("Online Retail System - Dashboard");
-        setSize(800, 600);  // Oversized for better view
+        setSize(1200, 800);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLocationRelativeTo(null);  // Center on screen
+        setLocationRelativeTo(null);
 
-        // Create a main panel with vertical layout
-        JPanel mainPanel = new JPanel();
-        mainPanel.setLayout(new BorderLayout());
+        JPanel mainPanel = new JPanel(new BorderLayout(20, 20));
+        mainPanel.setBackground(ModernColors.BACKGROUND);
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-        // Heading at the top
-        JLabel headingLabel = new JLabel("Welcome to Online Retail System", SwingConstants.CENTER);
-        headingLabel.setFont(new Font("Arial", Font.BOLD, 26));
-        headingLabel.setBorder(BorderFactory.createEmptyBorder(20, 0, 20, 0));
-        mainPanel.add(headingLabel, BorderLayout.NORTH);
+        mainPanel.add(createHeader(), BorderLayout.NORTH);
+        mainPanel.add(createButtonPanel(), BorderLayout.CENTER);
 
-        // Create a panel for buttons in the center
-        JPanel buttonPanel = new JPanel();
-        buttonPanel.setLayout(new GridLayout(2, 2, 30, 30)); // 2x2 grid with spacing
-        buttonPanel.setBorder(BorderFactory.createEmptyBorder(40, 60, 40, 60)); // Padding
-
-        // Create buttons for each module
-        JButton customerBtn = new JButton("Customers");
-        JButton productBtn = new JButton("Products");
-        JButton orderBtn = new JButton("Orders");
-        JButton paymentBtn = new JButton("Payments");
-
-        // Style the buttons
-        JButton[] buttons = { customerBtn, productBtn, orderBtn, paymentBtn };
-        for (JButton btn : buttons) {
-            btn.setFont(new Font("Arial", Font.PLAIN, 22));
-            btn.setPreferredSize(new Dimension(200, 100));
-        }
-
-        // Add buttons to the panel
-        buttonPanel.add(customerBtn);
-        buttonPanel.add(productBtn);
-        buttonPanel.add(orderBtn);
-        buttonPanel.add(paymentBtn);
-
-        // Add button panel to the main panel
-        mainPanel.add(buttonPanel, BorderLayout.CENTER);
-
-        // Add main panel to the frame
         add(mainPanel);
-
-        // Set frame visible
         setVisible(true);
-
-        // Action listeners for buttons (you can open actual forms or show messages here)
-        customerBtn.addActionListener(e -> JOptionPane.showMessageDialog(this, "Customer Panel Coming Soon!"));
-        productBtn.addActionListener(e -> JOptionPane.showMessageDialog(this, "Product Panel Coming Soon!"));
-        orderBtn.addActionListener(e -> JOptionPane.showMessageDialog(this, "Order Panel Coming Soon!"));
-        paymentBtn.addActionListener(e -> JOptionPane.showMessageDialog(this, "Payment Panel Coming Soon!"));
     }
 
-    // Main method to run this frame
+    private JPanel createHeader() {
+        JPanel header = new JPanel(new BorderLayout());
+        header.setBackground(ModernColors.PRIMARY);
+        header.setBorder(BorderFactory.createEmptyBorder(20, 25, 20, 25));
+
+        JLabel title = new JLabel("🏪 Online Retail System");
+        title.setFont(new Font("Segoe UI", Font.BOLD, 28));
+        title.setForeground(Color.WHITE);
+        header.add(title, BorderLayout.WEST);
+
+        JLabel subtitle = new JLabel("Your centralized management hub");
+        subtitle.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        subtitle.setForeground(new Color(200, 200, 255));
+        header.add(subtitle, BorderLayout.SOUTH);
+
+        return header;
+    }
+
+    private JPanel createButtonPanel() {
+        JPanel panel = new JPanel(new GridLayout(2, 2, 20, 20));
+        panel.setBackground(ModernColors.BACKGROUND);
+        panel.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(ModernColors.BORDER, 1),
+            BorderFactory.createEmptyBorder(30, 30, 30, 30)
+        ));
+
+        // Create buttons
+        JButton customerBtn = createActionButton("👤 Customers", "Manage customer records", ModernColors.SUCCESS);
+        JButton productBtn = createActionButton("📦 Products", "Manage inventory", ModernColors.INFO);
+        JButton orderBtn = createActionButton("🛒 Orders", "Process customer orders", ModernColors.WARNING);
+        JButton paymentBtn = createActionButton("💳 Payments", "Handle transactions", ModernColors.PRIMARY);
+
+        // Add navigation logic
+        customerBtn.addActionListener(e -> openPanel(new CustomerPanel()));
+        productBtn.addActionListener(e -> openPanel(new ProductPanel()));
+        orderBtn.addActionListener(e -> openPanel(new OrderPanel()));
+        paymentBtn.addActionListener(e -> openPanel(new PaymentPanel()));
+
+        panel.add(customerBtn);
+        panel.add(productBtn);
+        panel.add(orderBtn);
+        panel.add(paymentBtn);
+
+        return panel;
+    }
+
+    private JButton createActionButton(String title, String description, Color color) {
+        JButton button = new JButton();
+        button.setLayout(new BorderLayout());
+        button.setBackground(color.brighter().brighter());
+        button.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(color, 2),
+            BorderFactory.createEmptyBorder(20, 25, 20, 25)
+        ));
+        button.setFocusPainted(false);
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+        JLabel titleLabel = new JLabel(title);
+        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        titleLabel.setForeground(color.darker());
+        button.add(titleLabel, BorderLayout.NORTH);
+
+        JLabel descLabel = new JLabel(description);
+        descLabel.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        descLabel.setForeground(ModernColors.TEXT_SECONDARY);
+        descLabel.setBorder(BorderFactory.createEmptyBorder(8, 0, 0, 0));
+        button.add(descLabel, BorderLayout.SOUTH);
+
+        button.addMouseListener(new MouseAdapter() {
+            public void mouseEntered(MouseEvent e) {
+                button.setBackground(color);
+                titleLabel.setForeground(Color.WHITE);
+                descLabel.setForeground(new Color(220, 220, 220));
+            }
+            public void mouseExited(MouseEvent e) {
+                button.setBackground(color.brighter().brighter());
+                titleLabel.setForeground(color.darker());
+                descLabel.setForeground(ModernColors.TEXT_SECONDARY);
+            }
+        });
+
+        return button;
+    }
+
+    private void openPanel(JPanel panel) {
+        getContentPane().removeAll();
+        setLayout(new BorderLayout());
+        add(panel, BorderLayout.CENTER);
+        revalidate();
+        repaint();
+    }
+
     public static void main(String[] args) {
-        // Optional: Use system theme
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-        new RetailDashboard();  // Launch the dashboard
+        new RetailDashboard();
     }
 }
