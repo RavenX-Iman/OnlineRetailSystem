@@ -137,7 +137,7 @@ public class DashboardPanel extends JPanel {
     private JButton createActionButton(String text, Color color) {
         JButton button = new JButton(text);
         button.setBackground(color);
-        button.setForeground(Color.WHITE);
+        button.setForeground(Color.BLACK);
         button.setFont(new Font("Arial", Font.BOLD, 12));
         button.setBorder(BorderFactory.createEmptyBorder(10, 15, 10, 15));
         button.setFocusPainted(false);
