@@ -36,7 +36,7 @@ public class AdminPanel extends JPanel {
 
         JLabel subtitle = new JLabel("Manage system administrators and their roles");
         subtitle.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        subtitle.setForeground(ModernColors.TEXT_SECONDARY); // Lighter for contrast
+        subtitle.setForeground(Color.WHITE); // Lighter for contrast
         header.add(subtitle, BorderLayout.SOUTH);
 
         return header;

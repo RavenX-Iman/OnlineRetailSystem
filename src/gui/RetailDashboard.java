@@ -10,7 +10,7 @@ import gui.OrderPanel;
 
 public class RetailDashboard extends JFrame {
     public RetailDashboard() {
-        setTitle("Online Retail System - Dashboard");
+        setTitle("CYANITY - Dashboard");
         setSize(1200, 800);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);

@@ -41,8 +41,8 @@ public class MainFrame extends JFrame {
         add(cardPanel);
         cardLayout.show(cardPanel, "Splash");
 
-        // Switch to login after 5s
-        Timer timer = new Timer(5000, e -> cardLayout.show(cardPanel, "Login"));
+        // Switch to login after 2s
+        Timer timer = new Timer(2000, e -> cardLayout.show(cardPanel, "Login"));
         timer.setRepeats(false);
         timer.start();
 

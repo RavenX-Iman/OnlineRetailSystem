@@ -148,11 +148,11 @@ public class OrderPanel extends JPanel {
                 BorderFactory.createEmptyBorder(20, 20, 20, 20)
         ));
 
-        JLabel outputTitle = new JLabel("📋 Order Details");
-        outputTitle.setFont(new Font("Segoe UI", Font.BOLD, 16));
-        outputTitle.setForeground(ModernColors.TEXT_PRIMARY);
-        outputTitle.setBorder(BorderFactory.createEmptyBorder(0, 0, 15, 0));
-        panel.add(outputTitle, BorderLayout.NORTH);
+        // JLabel outputTitle = new JLabel("📋 Order Details");
+        // outputTitle.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        // outputTitle.setForeground(ModernColors.TEXT_PRIMARY);
+        // outputTitle.setBorder(BorderFactory.createEmptyBorder(0, 0, 15, 0));
+        // panel.add(outputTitle, BorderLayout.NORTH);
 
         outputArea = new JTextArea(6, 40);
         outputArea.setEditable(false);

@@ -1,29 +1,89 @@
 package gui;
 
+import onlineretailsystem.DatabaseManager;
+import onlineretailsystem.DashboardStats;
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 
 public class DashboardPanel extends JPanel {
     private JLabel timeLabel;
     private Timer timer;
+    private DashboardStats stats;
+    private JPanel statsPanel;
+    private JList<String> activityList;
+    private DefaultListModel<String> listModel;
+    private DecimalFormat currencyFormat = new DecimalFormat("#,##0.00");
+    private DecimalFormat numberFormat = new DecimalFormat("#,##0");
     
     public DashboardPanel() {
         setLayout(new BorderLayout(15, 15));
         setBackground(ModernColors.BACKGROUND);
         setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
         
+        // Load data from database
+        loadDashboardData();
+        
         add(createHeader(), BorderLayout.NORTH);
         add(createMainContent(), BorderLayout.CENTER);
         add(createFooterSection(), BorderLayout.SOUTH);
         
         startClock();
+        
+        // REMOVED: Auto-refresh timer that was causing popup issues
+        // Auto-refresh every 30 seconds (SILENTLY in background)
+        Timer refreshTimer = new Timer(30000, e -> silentRefreshDashboard());
+        refreshTimer.start();
+    }
+    
+    private void loadDashboardData() {
+        // Load all dashboard statistics from database
+        try {
+            System.out.println("Loading dashboard data from database...");
+            
+            stats = new DashboardStats(
+                DatabaseManager.getTotalCustomers(),
+                DatabaseManager.getTotalProducts(),
+                DatabaseManager.getPendingOrders(),
+                DatabaseManager.getTotalRevenue(),
+                DatabaseManager.getNewCustomersToday(),
+                DatabaseManager.getNewProductsThisWeek(),
+                DatabaseManager.getRevenueGrowthPercentage(),
+                DatabaseManager.getOutOfStockProducts(),
+                DatabaseManager.getLowStockProducts()
+            );
+            
+            System.out.println("Data loaded successfully:");
+            System.out.println("Total Customers: " + stats.getTotalCustomers());
+            System.out.println("Total Products: " + stats.getTotalProducts());
+            System.out.println("Total Revenue: " + stats.getTotalRevenue());
+            
+        } catch (Exception e) {
+            System.err.println("Error loading dashboard data: " + e.getMessage());
+            e.printStackTrace();
+            
+            // Fallback to default values if database connection fails
+            stats = new DashboardStats(0, 0, 0, 0.0, 0, 0, 0.0, 0, 0);
+            
+            // Show error only once, not repeatedly
+            SwingUtilities.invokeLater(() -> {
+                JOptionPane.showMessageDialog(this, 
+                    "Failed to load dashboard data: " + e.getMessage() + 
+                    "\n\nPlease check:\n" +
+                    "1. Database connection\n" +
+                    "2. SQL Server is running\n" +
+                    "3. Database tables exist", 
+                    "Database Error", 
+                    JOptionPane.ERROR_MESSAGE);
+            });
+        }
     }
     
     private JPanel createHeader() {
@@ -33,13 +93,12 @@ public class DashboardPanel extends JPanel {
 
         JPanel titlePanel = new JPanel(new BorderLayout());
         titlePanel.setBackground(ModernColors.PRIMARY);
-        
-        JLabel title = new JLabel("🏪 Retail System Dashboard");
+        JLabel title = new JLabel("🏪 CYANITY Dashboard");
         title.setFont(new Font("Segoe UI", Font.BOLD, 28));
         title.setForeground(Color.WHITE);
         titlePanel.add(title, BorderLayout.NORTH);
         
-        JLabel subtitle = new JLabel("Welcome back! Here's what's happening with your store today.");
+        JLabel subtitle = new JLabel("Real-time insights from your OnlineRetailDB database");
         subtitle.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         subtitle.setForeground(new Color(200, 200, 255));
         subtitle.setBorder(BorderFactory.createEmptyBorder(8, 0, 0, 0));
@@ -47,12 +106,28 @@ public class DashboardPanel extends JPanel {
         
         header.add(titlePanel, BorderLayout.WEST);
         
-        // Time display
+        // Refresh button and time display
+        JPanel rightPanel = new JPanel(new BorderLayout());
+        rightPanel.setBackground(ModernColors.PRIMARY);
+        
+        JButton refreshButton = new JButton("🔄 Refresh");
+        refreshButton.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        refreshButton.setBackground(Color.WHITE);
+        refreshButton.setForeground(ModernColors.PRIMARY);
+        refreshButton.setBorderPainted(false);
+        refreshButton.setFocusPainted(false);
+        refreshButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        refreshButton.addActionListener(e -> manualRefreshDashboard()); // Changed to manual refresh
+        rightPanel.add(refreshButton, BorderLayout.NORTH);
+        
         timeLabel = new JLabel();
         timeLabel.setFont(new Font("Segoe UI", Font.PLAIN, 16));
         timeLabel.setForeground(Color.WHITE);
         timeLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-        header.add(timeLabel, BorderLayout.EAST);
+        timeLabel.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
+        rightPanel.add(timeLabel, BorderLayout.SOUTH);
+        
+        header.add(rightPanel, BorderLayout.EAST);
         
         return header;
     }
@@ -62,13 +137,10 @@ public class DashboardPanel extends JPanel {
         main.setBackground(ModernColors.BACKGROUND);
         
         // Statistics cards
-        JPanel statsPanel = new JPanel(new GridLayout(2, 2, 20, 20));
+        statsPanel = new JPanel(new GridLayout(2, 2, 20, 20));
         statsPanel.setBackground(ModernColors.BACKGROUND);
         
-        statsPanel.add(createStatCard("👥 Total Customers", "1,245", "+12 today", ModernColors.SUCCESS));
-        statsPanel.add(createStatCard("📦 Total Products", "892", "+5 this week", ModernColors.INFO));
-        statsPanel.add(createStatCard("⏳ Pending Orders", "67", "Needs attention", ModernColors.WARNING));
-        statsPanel.add(createStatCard("💰 Total Revenue", "$45,230", "+8.5% this month", ModernColors.PRIMARY));
+        updateStatCards();
         
         main.add(statsPanel, BorderLayout.NORTH);
         
@@ -77,6 +149,56 @@ public class DashboardPanel extends JPanel {
         main.add(actionsPanel, BorderLayout.CENTER);
         
         return main;
+    }
+    
+    private void updateStatCards() {
+        statsPanel.removeAll();
+        
+        if (stats != null) {
+            // Calculate alert levels
+            String customerSubtitle = stats.getNewCustomersToday() > 0 ? 
+                "+" + stats.getNewCustomersToday() + " today" : "No new customers today";
+            
+            String productSubtitle = stats.getNewProductsThisWeek() > 0 ? 
+                "+" + stats.getNewProductsThisWeek() + " this week" : "No new products this week";
+            
+            String orderSubtitle = stats.getPendingOrders() > 0 ? 
+                "Needs attention" : "All orders processed";
+            
+            String revenueSubtitle = String.format("%.1f%% this month", stats.getRevenueGrowthPercentage());
+            
+            // Determine colors based on conditions
+            Color orderColor = stats.getPendingOrders() > 10 ? Color.MAGENTA : Color.BLUE;
+            Color revenueColor = stats.getRevenueGrowthPercentage() >= 0 ? Color.BLUE : Color.MAGENTA;
+            
+            statsPanel.add(createStatCard("👥 Total Customers", 
+                numberFormat.format(stats.getTotalCustomers()), 
+                customerSubtitle, 
+                ModernColors.SUCCESS));
+                
+            statsPanel.add(createStatCard("📦 Total Products", 
+                numberFormat.format(stats.getTotalProducts()), 
+                productSubtitle, 
+                ModernColors.INFO));
+                
+            statsPanel.add(createStatCard("⏳ Pending Orders", 
+                numberFormat.format(stats.getPendingOrders()), 
+                orderSubtitle, 
+                orderColor));
+                
+            statsPanel.add(createStatCard("💰 Total Revenue", 
+                "$" + currencyFormat.format(stats.getTotalRevenue()), 
+                revenueSubtitle, 
+                revenueColor));
+        } else {
+            // Loading state
+            for (int i = 0; i < 4; i++) {
+                statsPanel.add(createStatCard("Loading...", "---", "Please wait", ModernColors.TEXT_SECONDARY));
+            }
+        }
+        
+        statsPanel.revalidate();
+        statsPanel.repaint();
     }
     
     private JPanel createStatCard(String title, String value, String subtitle, Color accentColor) {
@@ -213,14 +335,10 @@ public class DashboardPanel extends JPanel {
         footer.add(activityTitle, BorderLayout.NORTH);
         
         // Activity list
-        DefaultListModel<String> listModel = new DefaultListModel<>();
-        listModel.addElement("🛒 New order #1234 received from John Doe - 2 minutes ago");
-        listModel.addElement("📦 Product 'Wireless Headphones' added to inventory - 15 minutes ago");
-        listModel.addElement("👤 New customer registration: Jane Smith - 1 hour ago");
-        listModel.addElement("💰 Payment of $299.99 processed for order #1233 - 2 hours ago");
-        listModel.addElement("📊 Daily sales report generated successfully - 3 hours ago");
+        listModel = new DefaultListModel<>();
+        updateRecentActivities();
         
-        JList<String> activityList = new JList<>(listModel);
+        activityList = new JList<>(listModel);
         activityList.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         activityList.setBackground(ModernColors.BACKGROUND);
         activityList.setSelectionBackground(new Color(240, 245, 255));
@@ -234,6 +352,63 @@ public class DashboardPanel extends JPanel {
         footer.add(scrollPane, BorderLayout.CENTER);
         
         return footer;
+    }
+    
+    private void updateRecentActivities() {
+        try {
+            List<String> activities = DatabaseManager.getRecentActivities();
+            listModel.clear();
+            
+            if (activities.isEmpty()) {
+                listModel.addElement("📊 No recent activities found");
+            } else {
+                for (String activity : activities) {
+                    listModel.addElement(activity);
+                }
+            }
+        } catch (Exception e) {
+            listModel.clear();
+            listModel.addElement("❌ Error loading activities: " + e.getMessage());
+            System.err.println("Error loading activities: " + e.getMessage());
+        }
+    }
+    
+    // SILENT refresh for auto-refresh timer (no popup)
+    private void silentRefreshDashboard() {
+        try {
+            System.out.println("Auto-refreshing dashboard data...");
+            loadDashboardData();
+            SwingUtilities.invokeLater(() -> {
+                updateStatCards();
+                updateRecentActivities();
+            });
+        } catch (Exception e) {
+            System.err.println("Silent refresh failed: " + e.getMessage());
+        }
+    }
+    
+    // MANUAL refresh for button click (with user feedback)
+    private void manualRefreshDashboard() {
+        SwingUtilities.invokeLater(() -> {
+            try {
+                // Show brief loading message
+                JOptionPane.showMessageDialog(this, 
+                    "Refreshing dashboard data...", 
+                    "Refresh", 
+                    JOptionPane.INFORMATION_MESSAGE);
+                
+                // Reload data
+                loadDashboardData();
+                updateStatCards();
+                updateRecentActivities();
+                
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(this, 
+                    "Failed to refresh dashboard: " + e.getMessage(), 
+                    "Refresh Error", 
+                    JOptionPane.ERROR_MESSAGE);
+            }
+        });
     }
     
     private void startClock() {

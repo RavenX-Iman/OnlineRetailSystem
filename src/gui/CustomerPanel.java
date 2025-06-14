@@ -47,37 +47,70 @@ public class CustomerPanel extends JPanel {
         add(createButtonPanel(), BorderLayout.SOUTH);
     }
 
+    // private JPanel createHeaderPanel() {
+    //     JPanel headerPanel = new JPanel();
+    //     headerPanel.setLayout(new BoxLayout(headerPanel, BoxLayout.Y_AXIS));
+    //     headerPanel.setBackground(BACKGROUND_MAIN);
+    //     headerPanel.setBorder(new EmptyBorder(0, 0, 30, 0));
+
+    //     // Main title
+    //     JLabel titleLabel = new JLabel("👤 Customer Registration");
+    //     titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 28));
+    //     titleLabel.setForeground(PRIMARY_BLUE);
+    //     titleLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+    //     // Subtitle
+    //     JLabel subtitleLabel = new JLabel("Enter customer details to add them to the system");
+    //     subtitleLabel.setFont(new Font("Segoe UI", Font.PLAIN, 16));
+    //     subtitleLabel.setForeground(TEXT_SECONDARY);
+    //     subtitleLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+    //     subtitleLabel.setBorder(new EmptyBorder(8, 0, 0, 0));
+
+    //     // Separator line
+    //     JSeparator separator = new JSeparator();
+    //     separator.setForeground(BORDER_COLOR);
+    //     separator.setMaximumSize(new Dimension(Integer.MAX_VALUE, 1));
+    //     separator.setBorder(new EmptyBorder(20, 0, 0, 0));
+
+    //     headerPanel.add(titleLabel);
+    //     headerPanel.add(subtitleLabel);
+    //     headerPanel.add(separator);
+
+    //     return headerPanel;
+    // }
     private JPanel createHeaderPanel() {
-        JPanel headerPanel = new JPanel();
-        headerPanel.setLayout(new BoxLayout(headerPanel, BoxLayout.Y_AXIS));
-        headerPanel.setBackground(BACKGROUND_MAIN);
-        headerPanel.setBorder(new EmptyBorder(0, 0, 30, 0));
+    JPanel headerPanel = new JPanel();
+    headerPanel.setLayout(new BoxLayout(headerPanel, BoxLayout.Y_AXIS));
+    headerPanel.setBackground(ModernColors.PRIMARY);
+    headerPanel.setBorder(new EmptyBorder(10, 25, 25, 25));
 
-        // Main title
-        JLabel titleLabel = new JLabel("👤 Customer Registration");
-        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 28));
-        titleLabel.setForeground(PRIMARY_BLUE);
-        titleLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+    // Main title
+    JLabel titleLabel = new JLabel("👤 Customer Registration");
+    titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 24));
+    titleLabel.setForeground(Color.WHITE);
+    titleLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        // Subtitle
-        JLabel subtitleLabel = new JLabel("Enter customer details to add them to the system");
-        subtitleLabel.setFont(new Font("Segoe UI", Font.PLAIN, 16));
-        subtitleLabel.setForeground(TEXT_SECONDARY);
-        subtitleLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        subtitleLabel.setBorder(new EmptyBorder(8, 0, 0, 0));
+    // Subtitle
+    JLabel subtitleLabel = new JLabel("Enter customer details to add them to the system");
+    subtitleLabel.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+    subtitleLabel.setForeground(new Color(220, 220, 255));
+    subtitleLabel.setBorder(new EmptyBorder(8, 0, 0, 0));
+    subtitleLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        // Separator line
-        JSeparator separator = new JSeparator();
-        separator.setForeground(BORDER_COLOR);
-        separator.setMaximumSize(new Dimension(Integer.MAX_VALUE, 1));
-        separator.setBorder(new EmptyBorder(20, 0, 0, 0));
+    // // Separator line
+    // JSeparator separator = new JSeparator();
+    // separator.setForeground(Color.WHITE);
+    // separator.setMaximumSize(new Dimension(Integer.MAX_VALUE, 1));
+    // separator.setBorder(new EmptyBorder(20, 0, 0, 0));
 
-        headerPanel.add(titleLabel);
-        headerPanel.add(subtitleLabel);
-        headerPanel.add(separator);
+    // Add components to headerPanel
+    headerPanel.add(titleLabel);
+    headerPanel.add(subtitleLabel);
+    // headerPanel.add(separator);
 
-        return headerPanel;
-    }
+    return headerPanel;
+}
+
 
     private JPanel createMainFormPanel() {
         JPanel mainPanel = new JPanel(new BorderLayout());
@@ -277,7 +310,7 @@ public class CustomerPanel extends JPanel {
     private JButton createPrimaryButton(String text) {
         JButton button = new JButton(text);
         button.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        button.setForeground(Color.WHITE);
+        button.setForeground(Color.BLACK);
         button.setBackground(PRIMARY_BLUE);
         button.setBorder(new EmptyBorder(12, 24, 12, 24));
         button.setFocusPainted(false);

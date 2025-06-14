@@ -1,65 +1,23 @@
 package gui;
 
-import onlineretailsystem.CategoryDAO;
-import onlineretailsystem.DBConnection;
 import onlineretailsystem.InventoryManager;
 import onlineretailsystem.ModelClasses.Category;
 import onlineretailsystem.ModelClasses.Product;
-import onlineretailsystem.ProductDAO;
-
 import javax.swing.*;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import java.awt.*;
-import java.util.List;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.math.BigDecimal;
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.time.LocalDateTime;
+import onlineretailsystem.ProductDAO;
+import onlineretailsystem.CategoryDAO;
+import onlineretailsystem.DBConnection;
+import java.sql.Connection;
 
 public class ProductPanel extends JPanel {
-    public ProductPanel() {
-    this(createDefaultProductDAO());
-}
-private static ProductDAO createDefaultProductDAO() {
-    try {
-        Connection conn = DBConnection.getConnection();
-        return new ProductDAO(conn);
-    } catch (SQLException e) {
-        e.printStackTrace();
-        return null; // Or throw RuntimeException if null isn't acceptable
-    }
-}
-        private final ProductDAO productDAO;
-    private final CategoryDAO categoryDAO; // moved up
-    public ProductPanel(ProductDAO productDAO) {
-    this.productDAO = productDAO;
-    this.categoryDAO = new CategoryDAO(); // moved up
-
-    setLayout(new BorderLayout());
-    setBackground(new Color(248, 250, 252));
-    setBorder(new EmptyBorder(25, 25, 25, 25));
-
-    createComponents();
-
-    JComboBox<Category> categoryComboBox = createCategoryComboBox();
-    add(categoryComboBox, BorderLayout.NORTH); // add properly
-
-    Category selected = (Category) categoryComboBox.getSelectedItem();
-    if (selected != null) {
-        int selectedCategoryId = selected.getCategoryId();
-        System.out.println("Selected category ID: " + selectedCategoryId);
-    }
-
-    initializePanel();
-}
-
-     
-    // createComponents() stays the same
-
 
     // Modern Color Palette
     private static final Color PRIMARY_BLUE = new Color(37, 99, 235);      // Modern blue
@@ -74,10 +32,13 @@ private static ProductDAO createDefaultProductDAO() {
     private static final Color HOVER_COLOR = new Color(29, 78, 216);        // Darker blue for hover
 
     private JTextField nameField, priceField, stockField, createdByField;
-    private JComboBox<Category> categoryBox;
-private JButton createBtn, clearBtn, cancelBtn;
+    private JComboBox<String> categoryBox;
+    private JButton createBtn, clearBtn, cancelBtn;
 
-
+    public ProductPanel() {
+        initializePanel();
+        createComponents();
+    }
 
     private void initializePanel() {
         setLayout(new BorderLayout());
@@ -92,111 +53,105 @@ private JButton createBtn, clearBtn, cancelBtn;
     }
 
     private JPanel createHeaderPanel() {
-        JPanel headerPanel = new JPanel();
-        headerPanel.setLayout(new BoxLayout(headerPanel, BoxLayout.Y_AXIS));
-        headerPanel.setBackground(BACKGROUND_MAIN);
-        headerPanel.setBorder(new EmptyBorder(0, 0, 30, 0));
 
-        // Main title
-        JLabel titleLabel = new JLabel("📦 Product Management");
-        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 28));
-        titleLabel.setForeground(PRIMARY_BLUE);
-        titleLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+    JPanel header = new JPanel(new BorderLayout());
+    header.setBackground(ModernColors.PRIMARY);
+    header.setBorder(BorderFactory.createEmptyBorder(20, 25, 20, 25));
 
-        // Subtitle
-        JLabel subtitleLabel = new JLabel("Add and manage inventory products efficiently");
-        subtitleLabel.setFont(new Font("Segoe UI", Font.PLAIN, 16));
-        subtitleLabel.setForeground(TEXT_SECONDARY);
-        subtitleLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        subtitleLabel.setBorder(new EmptyBorder(8, 0, 0, 0));
+    // Main title
+    JLabel title = new JLabel("📦 Product Management");
+    title.setFont(new Font("Segoe UI", Font.BOLD, 24));
+    title.setForeground(Color.WHITE);
+    header.add(title, BorderLayout.WEST);
 
-        // Separator line
-        JSeparator separator = new JSeparator();
-        separator.setForeground(BORDER_COLOR);
-        separator.setMaximumSize(new Dimension(Integer.MAX_VALUE, 1));
-        separator.setBorder(new EmptyBorder(20, 0, 0, 0));
+    // Subtitle
+    JLabel subtitle = new JLabel("Add and manage inventory products efficiently");
+    subtitle.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+    subtitle.setForeground(new Color(200, 200, 255));
+    header.add(subtitle, BorderLayout.SOUTH);
 
-        headerPanel.add(titleLabel);
-        headerPanel.add(subtitleLabel);
-        headerPanel.add(separator);
+    return header;
+}
 
-        return headerPanel;
+
+
+
+    private JPanel createMainFormPanel() {
+        JPanel mainPanel = new JPanel(new BorderLayout());
+        mainPanel.setBackground(BACKGROUND_MAIN);
+
+        // Initialize fields first
+        nameField = createStyledTextField("Product Name");
+        categoryBox = createStyledComboBox();
+        priceField = createStyledTextField("0.00");
+        stockField = createStyledTextField("0");
+        createdByField = createStyledTextField("Created By");
+
+        // Create card-style form panel
+        JPanel formCard = new JPanel();
+        formCard.setLayout(new BoxLayout(formCard, BoxLayout.Y_AXIS));
+        formCard.setBackground(BACKGROUND_CARD);
+        formCard.setBorder(new CompoundBorder(
+                new LineBorder(BORDER_COLOR, 1, true),
+                new EmptyBorder(30, 30, 30, 30)
+        ));
+
+        // Form title
+        JLabel formTitle = new JLabel("➕ Add New Product");
+        formTitle.setFont(new Font("Segoe UI", Font.BOLD, 20));
+        formTitle.setForeground(PRIMARY_BLUE);
+        formTitle.setAlignmentX(Component.LEFT_ALIGNMENT);
+        formTitle.setBorder(new EmptyBorder(0, 0, 25, 0));
+        formCard.add(formTitle);
+
+        // Add form sections
+        formCard.add(createProductInfoSection());
+
+        mainPanel.add(formCard, BorderLayout.CENTER);
+        return mainPanel;
     }
 
-private JPanel createMainFormPanel() {
-    JPanel mainPanel = new JPanel(new BorderLayout());
-    mainPanel.setBackground(BACKGROUND_MAIN);
+    private JPanel createProductInfoSection() {
+        JPanel section = new JPanel();
+        section.setLayout(new BoxLayout(section, BoxLayout.Y_AXIS));
+        section.setBackground(BACKGROUND_CARD);
+        section.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-    // Initialize fields once here
-    nameField = createStyledTextField("Product Name");
-    categoryBox = createCategoryComboBox();
-    priceField = createStyledTextField("0.00");
-    stockField = createStyledTextField("0");
-    createdByField = createStyledTextField("Created By");
+        // First row: Product Name and Category
+        JPanel nameRow = new JPanel(new GridLayout(1, 2, 20, 0));
+        nameRow.setBackground(BACKGROUND_CARD);
+        nameRow.setAlignmentX(Component.LEFT_ALIGNMENT);
+        nameRow.setMaximumSize(new Dimension(Integer.MAX_VALUE, nameRow.getPreferredSize().height + 60));
 
-    // Create card-style form panel
-    JPanel formCard = new JPanel();
-    formCard.setLayout(new BoxLayout(formCard, BoxLayout.Y_AXIS));
-    formCard.setBackground(BACKGROUND_CARD);
-    formCard.setBorder(new CompoundBorder(
-            new LineBorder(BORDER_COLOR, 1, true),
-            new EmptyBorder(0, 0, 0, 0)
-    ));
+        nameRow.add(createFieldPanel("Product Name *", nameField));
+        nameRow.add(createFieldPanel("Category *", categoryBox));
 
-    // Form title
-    JLabel formTitle = new JLabel("➕ Add New Product");
-    formTitle.setFont(new Font("Segoe UI", Font.BOLD, 20));
-    formTitle.setForeground(PRIMARY_BLUE);
-    formTitle.setAlignmentX(Component.LEFT_ALIGNMENT);
-    formTitle.setBorder(new EmptyBorder(0, 0, 25, 0));
-    formCard.add(formTitle);
+        section.add(nameRow);
+        section.add(Box.createVerticalStrut(20));
 
-    // Add form sections, using already initialized fields
-    formCard.add(createProductInfoSection());
+        // Second row: Price and Stock
+        JPanel priceStockRow = new JPanel(new GridLayout(1, 2, 20, 0));
+        priceStockRow.setBackground(BACKGROUND_CARD);
+        priceStockRow.setAlignmentX(Component.LEFT_ALIGNMENT);
+        priceStockRow.setMaximumSize(new Dimension(Integer.MAX_VALUE, priceStockRow.getPreferredSize().height + 60));
 
-    mainPanel.add(formCard, BorderLayout.CENTER);
-    return mainPanel;
-}
+        priceStockRow.add(createFieldPanel("Price *", priceField));
+        priceStockRow.add(createFieldPanel("Stock Quantity *", stockField));
+        
+        section.add(priceStockRow);
+        section.add(Box.createVerticalStrut(20));
 
-private JPanel createProductInfoSection() {
-    JPanel section = new JPanel();
-    section.setLayout(new BoxLayout(section, BoxLayout.Y_AXIS));
-    section.setBackground(BACKGROUND_CARD);
-    section.setAlignmentX(Component.LEFT_ALIGNMENT);
+        // Third row: Created By (full width)
+        JPanel createdByPanel = createFieldPanel("Created By *", createdByField);
+        createdByPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        createdByPanel.setMaximumSize(
+                new Dimension(Integer.MAX_VALUE, createdByPanel.getPreferredSize().height + 60)
+        );
+        //createdByPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, createdByPanel.getPreferredSize().height));
+        section.add(createdByPanel);
 
-    // Do NOT reinitialize fields here — use the ones initialized in createMainFormPanel()
-
-    // First row: Product Name and Category
-    JPanel nameRow = new JPanel(new GridLayout(1, 2, 20, 0));
-    nameRow.setBackground(BACKGROUND_CARD);
-    nameRow.setAlignmentX(Component.LEFT_ALIGNMENT);
-    nameRow.setMaximumSize(new Dimension(Integer.MAX_VALUE, nameRow.getPreferredSize().height));
-
-    nameRow.add(createFieldPanel("Product Name ", nameField));
-    nameRow.add(createFieldPanel("Category", categoryBox));
-
-    section.add(nameRow);
-    section.add(Box.createVerticalStrut(20));
-
-    // Second row: Price and Stock
-    JPanel priceStockRow = new JPanel(new GridLayout(1, 2, 20, 0));
-    priceStockRow.setBackground(BACKGROUND_CARD);
-    priceStockRow.setAlignmentX(Component.LEFT_ALIGNMENT);
-    priceStockRow.setMaximumSize(new Dimension(Integer.MAX_VALUE, priceStockRow.getPreferredSize().height));
-
-    priceStockRow.add(createFieldPanel("Price", priceField));
-    priceStockRow.add(createFieldPanel("Stock Quantity ", stockField));
-    section.add(priceStockRow);
-    section.add(Box.createVerticalStrut(20));
-
-    // Third row: Created By (full width)
-    JPanel createdByPanel = createFieldPanel("Created By", createdByField);
-    createdByPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
-    createdByPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, createdByPanel.getPreferredSize().height));
-    section.add(createdByPanel);
-
-    return section;
-}
+        return section;
+    }
 
     private JPanel createButtonPanel() {
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
@@ -248,119 +203,84 @@ private JPanel createProductInfoSection() {
         return panel;
     }
 
-private JTextField createStyledTextField(String placeholder) {
-    JTextField field = new JTextField(placeholder);
-    field.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-    field.setForeground(Color.GRAY); // placeholder color initially
-    field.setBackground(Color.WHITE);
-    field.setBorder(new CompoundBorder(
-            new LineBorder(BORDER_COLOR, 1, true),
-            new EmptyBorder(12, 16, 12, 16)
-    ));
-    field.setPreferredSize(new Dimension(200, 44));
+    private JTextField createStyledTextField(String placeholder) {
+        JTextField field = new JTextField();
+        field.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        field.setForeground(TEXT_PRIMARY);
+        field.setBackground(Color.WHITE);
+        field.setBorder(new CompoundBorder(
+                new LineBorder(BORDER_COLOR, 1, true),
+                new EmptyBorder(12, 16, 12, 16)
+        ));
+        field.setPreferredSize(new Dimension(200, 44));
 
-    field.addFocusListener(new FocusAdapter() {
-        @Override
-        public void focusGained(FocusEvent e) {
-            // Change border on focus
-            field.setBorder(new CompoundBorder(
-                    new LineBorder(FOCUS_COLOR, 2, true),
-                    new EmptyBorder(11, 15, 11, 15)
-            ));
-            // Remove placeholder text when focus gained
-            if (field.getText().equals(placeholder)) {
-                field.setText("");
-                field.setForeground(TEXT_PRIMARY); // normal text color
-            }
-        }
-
-        @Override
-        public void focusLost(FocusEvent e) {
-            // Restore border on focus lost
-            field.setBorder(new CompoundBorder(
-                    new LineBorder(BORDER_COLOR, 1, true),
-                    new EmptyBorder(12, 16, 12, 16)
-            ));
-            // If field is empty, show placeholder
-            if (field.getText().isEmpty()) {
-                field.setForeground(Color.GRAY);
-                field.setText(placeholder);
-            }
-        }
-    });
-
-    return field;
-}
-
-private JComboBox<Category> createCategoryComboBox() {
-    CategoryDAO categoryDAO = new CategoryDAO();
-    List<Category> categoryList = categoryDAO.getAllCategories();
-
-    JComboBox<Category> combo = new JComboBox<>(categoryList.toArray(new Category[0]));
-
-    combo.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-    combo.setBackground(Color.WHITE);
-    combo.setForeground(Color.DARK_GRAY);
-    combo.setBorder(new CompoundBorder(
-            new LineBorder(Color.GRAY, 1, true),
-            new EmptyBorder(8, 16, 8, 16)
-    ));
-    combo.setPreferredSize(new Dimension(400, 55));
-    combo.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-
-    combo.addFocusListener(new FocusAdapter() {
-        @Override
-        public void focusGained(FocusEvent e) {
-            combo.setBorder(new CompoundBorder(
-                    new LineBorder(new Color(0x4682B4), 2, true),
-                    new EmptyBorder(7, 15, 7, 15)
-            ));
-        }
-
-        @Override
-        public void focusLost(FocusEvent e) {
-            combo.setBorder(new CompoundBorder(
-                    new LineBorder(Color.GRAY, 1, true),
-                    new EmptyBorder(8, 16, 8, 16)
-            ));
-        }
-    });
-
-    combo.setRenderer(new DefaultListCellRenderer() {
-        @Override
-        public Component getListCellRendererComponent(JList<?> list, Object value, int index,
-                                                      boolean isSelected, boolean cellHasFocus) {
-            super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-            setFont(new Font("Segoe UI", Font.PLAIN, 14));
-            setBorder(new EmptyBorder(0, 0, 0, 0));
-
-            if (value instanceof Category) {
-                setText(((Category) value).getCategoryName());
+        // Add focus effects
+        field.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                field.setBorder(new CompoundBorder(
+                        new LineBorder(FOCUS_COLOR, 2, true),
+                        new EmptyBorder(11, 15, 11, 15)
+                ));
             }
 
-            if (isSelected) {
-                setBackground(new Color(0x4682B4));
-                setForeground(Color.WHITE);
-            } else {
-                setBackground(Color.WHITE);
-                setForeground(Color.DARK_GRAY);
+            @Override
+            public void focusLost(FocusEvent e) {
+                field.setBorder(new CompoundBorder(
+                        new LineBorder(BORDER_COLOR, 1, true),
+                        new EmptyBorder(12, 16, 12, 16)
+                ));
             }
-            return this;
-        }
-    });
+        });
 
-    return combo;
-}
+        return field;
+    }
+
+    private JComboBox<String> createStyledComboBox() {
+        String[] categories = {"Electronics", "Books", "Clothing", "Groceries", "Home & Garden", "Sports", "Beauty"};
+        JComboBox<String> combo = new JComboBox<>(categories);
+        combo.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        combo.setBackground(Color.WHITE);
+        combo.setForeground(TEXT_PRIMARY);
+        combo.setBorder(new CompoundBorder(
+                new LineBorder(BORDER_COLOR, 1, true),
+                new EmptyBorder(0, 0, 0, 0)
+        ));
+        combo.setPreferredSize(new Dimension(200, 44));
+        combo.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
+        // Custom renderer for better styling
+        combo.setRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index,
+                                                          boolean isSelected, boolean cellHasFocus) {
+                super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+                setFont(new Font("Segoe UI", Font.PLAIN, 14));
+                setBorder(new EmptyBorder(10, 12, 10, 12));
+
+                if (isSelected) {
+                    setBackground(SECONDARY_BLUE);
+                    setForeground(Color.WHITE);
+                } else {
+                    setBackground(Color.WHITE);
+                    setForeground(TEXT_PRIMARY);
+                }
+                return this;
+            }
+        });
+
+        return combo;
+    }
 
     private JButton createPrimaryButton(String text) {
         JButton button = new JButton(text);
         button.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        button.setForeground(Color.WHITE);
+        button.setForeground(Color.BLACK);
         button.setBackground(PRIMARY_BLUE);
-        button.setBorder(new EmptyBorder(0, 0, 0, 0));
+        button.setBorder(new EmptyBorder(12, 24, 12, 24));
         button.setFocusPainted(false);
         button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        button.setPreferredSize(new Dimension(260, 55));
+        button.setPreferredSize(new Dimension(180, 44));
 
         // Add hover effect
         button.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -400,72 +320,97 @@ private JComboBox<Category> createCategoryComboBox() {
 
         return button;
     }
+// Then modify the handleCreateProduct() method:
+private void handleCreateProduct() {
+    try {
+        String name = nameField.getText().trim();
+        String categoryName = (String) categoryBox.getSelectedItem();
+        String priceText = priceField.getText().trim();
+        String stockText = stockField.getText().trim();
+        String createdBy = createdByField.getText().trim();
 
-    private void handleCreateProduct() {
+        // Validation
+        if (name.isEmpty() || priceText.isEmpty() || stockText.isEmpty() || createdBy.isEmpty()) {
+            showErrorDialog("Please fill in all required fields (marked with *)");
+            return;
+        }
+
+        BigDecimal price;
+        int stock;
+
         try {
-            String name = nameField.getText().trim();
-            String categoryName = (String) categoryBox.getSelectedItem();
-            String priceText = priceField.getText().trim();
-            String stockText = stockField.getText().trim();
-            String createdBy = createdByField.getText().trim();
-
-            // Validation
-                if (name.isEmpty() || name.equals("Product Name") ||
-        priceText.isEmpty() || priceText.equals("0.00") ||
-        stockText.isEmpty() || stockText.equals("0") ||
-        createdBy.isEmpty() || createdBy.equals("Created By")) {
-        showErrorDialog("Please fill in all required fields (marked with *)");
-        return;
-    }
-
-            BigDecimal price;
-            int stock;
-
-            try {
-                price = new BigDecimal(getPrice());
-                if (price.compareTo(BigDecimal.ZERO) <= 0) {
-                    showErrorDialog("Price must be greater than 0");
-                    return;
-                }
-            } catch (NumberFormatException e) {
-                showErrorDialog("Please enter a valid price (e.g., 19.99)");
+            price = new BigDecimal(priceText);
+            if (price.compareTo(BigDecimal.ZERO) <= 0) {
+                showErrorDialog("Price must be greater than 0");
                 return;
             }
+        } catch (NumberFormatException e) {
+            showErrorDialog("Please enter a valid price (e.g., 19.99)");
+            return;
+        }
 
-            try {
-                stock = Integer.parseInt(stockText);
-                if (stock < 0) {
-                    showErrorDialog("Stock quantity cannot be negative");
-                    return;
-                }
-            } catch (NumberFormatException e) {
-                showErrorDialog("Please enter a valid stock quantity (whole number)");
+        try {
+            stock = Integer.parseInt(stockText);
+            if (stock < 0) {
+                showErrorDialog("Stock quantity cannot be negative");
                 return;
             }
+        } catch (NumberFormatException e) {
+            showErrorDialog("Please enter a valid stock quantity (whole number)");
+            return;
+        }
 
-            LocalDateTime now = LocalDateTime.now();
-            Category category = new Category(0, categoryName, "");
-            Product product = new Product(0, name, category, price, stock, now, createdBy, now);
+        // Get database connection
+        Connection conn = DBConnection.getConnection();
+        if (conn == null) {
+            showErrorDialog("Database connection failed");
+            return;
+        }
 
-            boolean inserted = productDAO.insertProduct(product);
-     if (!inserted) {
-         showErrorDialog("Failed to save product to database.");
-       return; 
-     }
+        // Get category by name
+        CategoryDAO categoryDAO = new CategoryDAO(conn);
+        Category category = null;
+        java.util.List<Category> categories = categoryDAO.getAllCategories();
+        
+        for (Category cat : categories) {
+            if (cat.getCategoryName().equalsIgnoreCase(categoryName)) {
+                category = cat;
+                break;
+            }
+        }
+        
+        if (category == null) {
+            showErrorDialog("Category '" + categoryName + "' not found in database. Please add it first or select an existing category.");
+            return;
+        }
 
-            // Update inventory
+        // Create product
+        LocalDateTime now = LocalDateTime.now();
+        Product product = new Product(0, name, category, price, stock, now, createdBy, now);
+
+        // Save to database
+        ProductDAO productDAO = new ProductDAO(conn);
+        if (productDAO.insertProduct(product)) {
+            // Update inventory manager after successful database insert
             InventoryManager.getInstance().updateStock(product, stock);
 
             // Success message
-            showSuccessDialog("Product created successfully!\n\n" + "Name: " + name + "\n" + "Category: " + categoryName + "\n" +
-                    "Price: $" + price + "\n" + "Stock: " + stock + " units");
+            showSuccessDialog("Product created successfully!\n\n" + 
+                    "Name: " + name + "\n" + 
+                    "Category: " + categoryName + "\n" +
+                    "Price: $" + price + "\n" + 
+                    "Stock: " + stock + " units");
 
             clearFields();
-
-        } catch (Exception ex) {
-            showErrorDialog("Error creating product: " + ex.getMessage());
+        } else {
+            showErrorDialog("Failed to save product to database");
         }
+
+    } catch (Exception ex) {
+        showErrorDialog("Error creating product: " + ex.getMessage());
     }
+}
+    
 
     private void showErrorDialog(String message) {
         JOptionPane.showMessageDialog(this,
@@ -482,21 +427,12 @@ private JComboBox<Category> createCategoryComboBox() {
     }
 
     private void clearFields() {
- nameField.setText("Product Name");
-    nameField.setForeground(Color.GRAY);
-
-    priceField.setText("0.00");
-    priceField.setForeground(Color.GRAY);
-
-    stockField.setText("0");
-    stockField.setForeground(Color.GRAY);
-
-    createdByField.setText("Created By");
-    createdByField.setForeground(Color.GRAY);
-
-    categoryBox.setSelectedIndex(0);
-    nameField.requestFocus();
-
+        nameField.setText("");
+        priceField.setText("");
+        stockField.setText("");
+        createdByField.setText("");
+        categoryBox.setSelectedIndex(0);
+        nameField.requestFocus();
     }
 
     // Getter methods for accessing field values
