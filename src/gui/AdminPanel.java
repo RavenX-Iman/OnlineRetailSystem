@@ -18,7 +18,7 @@ public class AdminPanel extends JPanel {
     public AdminPanel() {
         setLayout(new BorderLayout(15, 15));
         setBackground(ModernColors.BACKGROUND);
-        setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
 
         add(createHeader(), BorderLayout.NORTH);
         add(createMainContent(), BorderLayout.CENTER);
@@ -27,7 +27,7 @@ public class AdminPanel extends JPanel {
     private JPanel createHeader() {
         JPanel header = new JPanel(new BorderLayout());
         header.setBackground(ModernColors.PRIMARY);
-        header.setBorder(BorderFactory.createEmptyBorder(20, 25, 20, 25));
+        header.setBorder(BorderFactory.createEmptyBorder(10, 25, 10, 25));
 
         JLabel title = new JLabel("👨‍💼 Admin Management");
         title.setFont(new Font("Segoe UI", Font.BOLD, 24));
@@ -120,7 +120,7 @@ public class AdminPanel extends JPanel {
 
         JLabel tableTitle = new JLabel("📋 Current Administrators");
         tableTitle.setFont(new Font("Segoe UI", Font.BOLD, 16));
-        tableTitle.setForeground(ModernColors.TEXT_PRIMARY);
+        tableTitle.setForeground(Color.BLACK);
         tableTitle.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
         panel.add(tableTitle, BorderLayout.NORTH);
 
@@ -167,7 +167,7 @@ public class AdminPanel extends JPanel {
         table.setSelectionForeground(ModernColors.TEXT_PRIMARY);
         table.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 13));
         table.getTableHeader().setBackground(ModernColors.PRIMARY);
-        table.getTableHeader().setForeground(Color.WHITE);
+        table.getTableHeader().setForeground(Color.BLACK);
 
         // Alternating row colors
         table.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
@@ -190,7 +190,7 @@ public class AdminPanel extends JPanel {
         JButton button = new JButton(text);
         button.setFont(new Font("Segoe UI", Font.BOLD, 14));
         button.setBackground(ModernColors.PRIMARY);
-        button.setForeground(Color.WHITE); // White on blue is readable
+        button.setForeground(Color.BLACK); // White on blue is readable
         button.setBorder(BorderFactory.createEmptyBorder(12, 24, 12, 24));
         button.setFocusPainted(false);
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
@@ -233,7 +233,7 @@ public class AdminPanel extends JPanel {
         gbc.anchor = GridBagConstraints.WEST;
         JLabel lbl = new JLabel(label);
         lbl.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        lbl.setForeground(ModernColors.TEXT_PRIMARY);
+        lbl.setForeground(Color.BLACK);
         panel.add(lbl, gbc);
 
         gbc.gridx = 1; gbc.gridy = row; gbc.gridwidth = 1; gbc.weightx = 1.0;
@@ -244,7 +244,7 @@ public class AdminPanel extends JPanel {
         gbc.insets = new Insets(2, 10, 8, 10);
         JLabel hintLabel = new JLabel(hint);
         hintLabel.setFont(new Font("Segoe UI", Font.ITALIC, 12));
-        hintLabel.setForeground(ModernColors.TEXT_SECONDARY);
+        hintLabel.setForeground(Color.BLACK);
         panel.add(hintLabel, gbc);
 
         gbc.insets = new Insets(8, 10, 8, 10); // Reset insets

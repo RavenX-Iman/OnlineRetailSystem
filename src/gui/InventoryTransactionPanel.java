@@ -1,15 +1,19 @@
 package gui;
 
+import onlineretailsystem.InventoryTransactionDAO;
 import onlineretailsystem.ModelClasses.InventoryTransaction;
-import onlineretailsystem.ModelClasses.Product;
 import onlineretailsystem.ModelClasses.InventoryTransaction.TransactionType;
+import onlineretailsystem.ModelClasses.Product;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.util.List;
+import java.util.ArrayList;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.math.BigDecimal;
+import java.text.NumberFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -18,6 +22,8 @@ public class InventoryTransactionPanel extends JPanel {
     private JComboBox<TransactionType> typeComboBox;
     private JTable transactionTable;
     private DefaultTableModel tableModel;
+    private final InventoryTransactionDAO transactionDAO = new InventoryTransactionDAO();
+
 
     public InventoryTransactionPanel() {
         setLayout(new BorderLayout(20, 20));
@@ -26,7 +32,7 @@ public class InventoryTransactionPanel extends JPanel {
 
         add(createHeader(), BorderLayout.NORTH);
         add(createMainContent(), BorderLayout.CENTER);
-        
+
         loadSampleData();
     }
 
@@ -35,32 +41,29 @@ public class InventoryTransactionPanel extends JPanel {
         header.setBackground(ModernColors.PRIMARY);
         header.setBorder(BorderFactory.createEmptyBorder(20, 25, 20, 25));
 
-        JPanel titlePanel = new JPanel(new BorderLayout());
-        titlePanel.setBackground(ModernColors.PRIMARY);
-        
         JLabel title = new JLabel("📦 Inventory Transactions");
         title.setFont(new Font("Segoe UI", Font.BOLD, 24));
         title.setForeground(Color.WHITE);
-        titlePanel.add(title, BorderLayout.NORTH);
 
         JLabel subtitle = new JLabel("Track and manage inventory movements");
         subtitle.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         subtitle.setForeground(new Color(200, 200, 255));
         subtitle.setBorder(BorderFactory.createEmptyBorder(5, 0, 0, 0));
-        titlePanel.add(subtitle, BorderLayout.SOUTH);
-        
-        header.add(titlePanel, BorderLayout.WEST);
 
+        JPanel titlePanel = new JPanel(new BorderLayout());
+        titlePanel.setBackground(ModernColors.PRIMARY);
+        titlePanel.add(title, BorderLayout.NORTH);
+        titlePanel.add(subtitle, BorderLayout.SOUTH);
+
+        header.add(titlePanel, BorderLayout.WEST);
         return header;
     }
 
     private JPanel createMainContent() {
         JPanel main = new JPanel(new BorderLayout(20, 20));
         main.setBackground(ModernColors.BACKGROUND);
-
         main.add(createFormPanel(), BorderLayout.NORTH);
         main.add(createTablePanel(), BorderLayout.CENTER);
-
         return main;
     }
 
@@ -68,65 +71,75 @@ public class InventoryTransactionPanel extends JPanel {
         JPanel panel = new JPanel(new GridBagLayout());
         panel.setBackground(Color.WHITE);
         panel.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(ModernColors.BORDER, 1),
-            BorderFactory.createEmptyBorder(25, 30, 25, 30)
+                BorderFactory.createLineBorder(ModernColors.BORDER, 1),
+                BorderFactory.createEmptyBorder(20, 20, 20, 20)
         ));
 
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(12, 10, 12, 10);
+        gbc.insets = new Insets(10, 10, 10, 10);
         gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.anchor = GridBagConstraints.WEST;
 
-        // Initialize fields
-        productNameField = createStyledTextField();
-        priceField = createStyledTextField();
-        quantityField = createStyledTextField();
-        reasonField = createStyledTextField();
-        typeComboBox = createStyledComboBox();
-
-        // Add form title
+        // Row 0 - Title
         JLabel formTitle = new JLabel("➕ Add New Transaction");
         formTitle.setFont(new Font("Segoe UI", Font.BOLD, 18));
         formTitle.setForeground(ModernColors.TEXT_PRIMARY);
-        formTitle.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0));
-        
-        gbc.gridx = 0; gbc.gridy = 0; gbc.gridwidth = 4;
+        gbc.gridx = 0; gbc.gridy = 0; gbc.gridwidth = 2;
         panel.add(formTitle, gbc);
 
-        // Form fields
-        addFormField(panel, "📦 Product Name", productNameField, gbc, 1, 0);
-        addFormField(panel, "💰 Product Price", priceField, gbc, 1, 2);
-        addFormField(panel, "🔢 Quantity", quantityField, gbc, 2, 0);
-        addFormField(panel, "🔄 Transaction Type", typeComboBox, gbc, 2, 2);
-        
-        // Reason field spans full width
-        gbc.gridx = 0; gbc.gridy = 3; gbc.gridwidth = 1; gbc.weightx = 0;
-        JLabel reasonLabel = new JLabel("📝 Reason");
-        reasonLabel.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        reasonLabel.setForeground(ModernColors.TEXT_PRIMARY);
-        panel.add(reasonLabel, gbc);
+        // Reset gridwidth
+        gbc.gridwidth = 1;
 
-        gbc.gridx = 0; gbc.gridy = 4; gbc.gridwidth = 4; gbc.weightx = 1.0;
+        // Row 1 - Product Name
+        gbc.gridx = 0; gbc.gridy = 1;
+        panel.add(new JLabel("📦 Product Name:"), gbc);
+        gbc.gridx = 1;
+        productNameField = new JTextField(20);
+        panel.add(productNameField, gbc);
+
+        // Row 2 - Product Price
+        gbc.gridx = 0; gbc.gridy = 2;
+        panel.add(new JLabel("💰 Product Price:"), gbc);
+        gbc.gridx = 1;
+        priceField = new JTextField(20);
+        panel.add(priceField, gbc);
+
+        // Row 3 - Quantity
+        gbc.gridx = 0; gbc.gridy = 3;
+        panel.add(new JLabel("🔢 Quantity:"), gbc);
+        gbc.gridx = 1;
+        quantityField = new JTextField(20);
+        panel.add(quantityField, gbc);
+
+        // Row 4 - Transaction Type
+        gbc.gridx = 0; gbc.gridy = 4;
+        panel.add(new JLabel("🔄 Transaction Type:"), gbc);
+        gbc.gridx = 1;
+        typeComboBox = new JComboBox<>(TransactionType.values());
+        panel.add(typeComboBox, gbc);
+
+        // Row 5 - Reason
+        gbc.gridx = 0; gbc.gridy = 5;
+        panel.add(new JLabel("📝 Reason:"), gbc);
+        gbc.gridx = 1;
+        reasonField = new JTextField(20);
         panel.add(reasonField, gbc);
 
-        // Add button
-        JButton addButton = createPrimaryButton("Add Transaction");
+        // Row 6 - Add Button
+        gbc.gridx = 0; gbc.gridy = 6; gbc.gridwidth = 2;
+        JButton addButton = new JButton("Add Transaction");
         addButton.addActionListener(e -> addTransaction());
-
-        gbc.gridy = 5; gbc.gridwidth = 4;
-        gbc.insets = new Insets(25, 0, 0, 0);
-        gbc.anchor = GridBagConstraints.CENTER;
         panel.add(addButton, gbc);
 
         return panel;
     }
 
+
     private JPanel createTablePanel() {
         JPanel panel = new JPanel(new BorderLayout());
         panel.setBackground(Color.WHITE);
         panel.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(ModernColors.BORDER, 1),
-            BorderFactory.createEmptyBorder(20, 20, 20, 20)
+                BorderFactory.createLineBorder(ModernColors.BORDER, 1),
+                BorderFactory.createEmptyBorder(20, 20, 20, 20)
         ));
 
         JLabel tableTitle = new JLabel("📋 Transaction History");
@@ -142,17 +155,28 @@ public class InventoryTransactionPanel extends JPanel {
         JScrollPane scrollPane = new JScrollPane(transactionTable);
         scrollPane.setBorder(BorderFactory.createLineBorder(ModernColors.BORDER));
         scrollPane.getViewport().setBackground(Color.WHITE);
-        panel.add(scrollPane, BorderLayout.CENTER);
 
+        panel.add(scrollPane, BorderLayout.CENTER);
         return panel;
+    }
+
+    private void addFormField(JPanel panel, String label, JComponent field, GridBagConstraints gbc, int row, int col) {
+        gbc.gridx = col; gbc.gridy = row; gbc.gridwidth = 1; gbc.weightx = 0;
+        JLabel lbl = new JLabel(label);
+        lbl.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        lbl.setForeground(ModernColors.TEXT_PRIMARY);
+        panel.add(lbl, gbc);
+
+        gbc.gridy = row + 1; gbc.weightx = 0.5;
+        panel.add(field, gbc);
     }
 
     private JTextField createStyledTextField() {
         JTextField field = new JTextField(20);
         field.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         field.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(ModernColors.BORDER, 1),
-            BorderFactory.createEmptyBorder(10, 12, 10, 12)
+                BorderFactory.createLineBorder(ModernColors.BORDER, 1),
+                BorderFactory.createEmptyBorder(10, 12, 10, 12)
         ));
         return field;
     }
@@ -187,8 +211,6 @@ public class InventoryTransactionPanel extends JPanel {
         button.setBorder(BorderFactory.createEmptyBorder(12, 30, 12, 30));
         button.setFocusPainted(false);
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        
-        // Hover effect
         button.addMouseListener(new MouseAdapter() {
             public void mouseEntered(MouseEvent e) {
                 button.setBackground(ModernColors.PRIMARY.darker());
@@ -197,65 +219,70 @@ public class InventoryTransactionPanel extends JPanel {
                 button.setBackground(ModernColors.PRIMARY);
             }
         });
-        
         return button;
     }
 
-    private void addFormField(JPanel panel, String label, JComponent field, GridBagConstraints gbc, int row, int col) {
-        gbc.gridx = col; gbc.gridy = row; gbc.gridwidth = 1; gbc.weightx = 0;
-        JLabel lbl = new JLabel(label);
-        lbl.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        lbl.setForeground(ModernColors.TEXT_PRIMARY);
-        panel.add(lbl, gbc);
+private void addTransaction() {
+    try {
+        // Step 1: Read and validate input
+        String productName = productNameField.getText().trim();
+        String priceText = priceField.getText().trim();
+        String quantityText = quantityField.getText().trim();
+        String reason = reasonField.getText().trim();
+        TransactionType type = (TransactionType) typeComboBox.getSelectedItem();
 
-        gbc.gridx = col; gbc.gridy = row + 1; gbc.gridwidth = 1; gbc.weightx = 0.5;
-        panel.add(field, gbc);
-    }
+        if (productName.isEmpty() || priceText.isEmpty() || quantityText.isEmpty()) {
+            showMessage("Please fill in all required fields.", "Input Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
 
-    private void addTransaction() {
-        try {
-            String productName = productNameField.getText().trim();
-            String priceText = priceField.getText().trim();
-            String quantityText = quantityField.getText().trim();
-            String reason = reasonField.getText().trim();
-            TransactionType type = (TransactionType) typeComboBox.getSelectedItem();
+        BigDecimal price = new BigDecimal(priceText);
+        int quantity = Integer.parseInt(quantityText);
 
-            // Validation
-            if (productName.isEmpty() || priceText.isEmpty() || quantityText.isEmpty()) {
-                showMessage("Please fill in all required fields.", "Input Error", JOptionPane.ERROR_MESSAGE);
-                return;
-            }
+        if (price.compareTo(BigDecimal.ZERO) <= 0 || quantity <= 0) {
+            showMessage("Price and quantity must be positive values.", "Input Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
 
-            BigDecimal price = new BigDecimal(priceText);
-            int quantity = Integer.parseInt(quantityText);
+        // Step 2: Create transaction object
+        Product dummyProduct = new Product(); // To be replaced with real product lookup
+        dummyProduct.setProductId(1); // Placeholder
+        dummyProduct.setProductName(productName); // For display
+        dummyProduct.setPrice(price); // Not used in DAO, but useful here
 
-            if (price.compareTo(BigDecimal.ZERO) <= 0 || quantity <= 0) {
-                showMessage("Price and quantity must be positive values.", "Input Error", JOptionPane.ERROR_MESSAGE);
-                return;
-            }
+        InventoryTransaction tx = new InventoryTransaction();
+        tx.setProduct(dummyProduct);
+        tx.setTransactionType(type);
+        tx.setQuantity(quantity);
+        tx.setReason(reason.isEmpty() ? "N/A" : reason);
+        tx.setCreatedAt(LocalDateTime.now());
 
-            // Add to table
-            String formattedDate = LocalDateTime.now().format(DateTimeFormatter.ofPattern("MMM dd, yyyy HH:mm"));
-            String typeDisplay = type.toString().replace("_", " ");
-            
+        // Step 3: Insert into DB
+        boolean success = transactionDAO.insert(tx);
+        if (success) {
+            // Step 4: Update table
             tableModel.addRow(new Object[]{
-                productName, 
-                typeDisplay, 
-                quantity, 
-                "$" + price.toString(), 
-                reason.isEmpty() ? "N/A" : reason, 
-                formattedDate
+                productName,
+                type.toString().replace("_", " "),
+                quantity,
+                "$" + price,
+                reason.isEmpty() ? "N/A" : reason,
+                tx.getCreatedAt().format(DateTimeFormatter.ofPattern("MMM dd, yyyy HH:mm"))
             });
 
             clearFields();
-            showMessage("Transaction added successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
-
-        } catch (NumberFormatException ex) {
-            showMessage("Please enter valid numbers for price and quantity.", "Input Error", JOptionPane.ERROR_MESSAGE);
-        } catch (Exception ex) {
-            showMessage("Error adding transaction: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            showMessage("Transaction added and saved to DB!", "Success", JOptionPane.INFORMATION_MESSAGE);
+        } else {
+            showMessage("Failed to insert into database.", "Database Error", JOptionPane.ERROR_MESSAGE);
         }
+
+    } catch (NumberFormatException ex) {
+        showMessage("Please enter valid numbers for price and quantity.", "Input Error", JOptionPane.ERROR_MESSAGE);
+    } catch (Exception ex) {
+        showMessage("Error adding transaction: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
     }
+}
+
 
     private void clearFields() {
         productNameField.setText("");
@@ -269,10 +296,29 @@ public class InventoryTransactionPanel extends JPanel {
         JOptionPane.showMessageDialog(this, message, title, messageType);
     }
 
-    private void loadSampleData() {
-        // Add some sample data
-        tableModel.addRow(new Object[]{"Laptop Pro", "STOCK_IN", "10", "$999.99", "New shipment", "Dec 10, 2024 14:30"});
-        tableModel.addRow(new Object[]{"Wireless Mouse", "STOCK_OUT", "5", "$29.99", "Customer purchase", "Dec 10, 2024 15:45"});
-        tableModel.addRow(new Object[]{"Gaming Keyboard", "ADJUSTMENT", "2", "$79.99", "Damaged items", "Dec 09, 2024 11:20"});
+private void loadSampleData() {
+    tableModel.setRowCount(0); // Add this at the start of loadSampleData()
+    // Load all transactions from the DAO
+    List<InventoryTransaction> transactions = transactionDAO.getAllTransactions();
+    DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("MMM dd, yyyy HH:mm");
+    NumberFormat currencyFormatter = NumberFormat.getCurrencyInstance();
+
+    for (InventoryTransaction tx : transactions) {
+        Product product = tx.getProduct();
+        
+        // Fallbacks in case of missing product info
+        String productName = (product != null && product.getProductName() != null) ? product.getProductName() : "Unknown";
+        String price = (product != null && product.getPrice() != null) ? currencyFormatter.format(product.getPrice()) : "$0.00";
+
+        tableModel.addRow(new Object[]{
+            productName,
+            tx.getTransactionType().toString().replace("_", " "),
+            tx.getQuantity(),
+            price,
+            tx.getReason() != null ? tx.getReason() : "N/A",
+            tx.getCreatedAt().format(dateFormatter)
+        });
     }
+}
+
 }

@@ -1,20 +1,26 @@
 package gui;
 
+import onlineretailsystem.CustomerDAO;
+import onlineretailsystem.DBConnection;
+import onlineretailsystem.ModelClasses;
 import onlineretailsystem.ModelClasses.Customer;
 import onlineretailsystem.ModelClasses.Order;
 import onlineretailsystem.ModelClasses.OrderItem;
+import onlineretailsystem.OrderDAO;
+
 import javax.swing.*;
 import java.awt.*;
 import java.math.BigDecimal;
+import java.sql.Connection;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 public class OrderPanel extends JPanel {
+
     private JTextField customerNameField, totalAmountField;
     private JComboBox<Order.OrderStatus> statusComboBox;
-    private JTextArea orderItemsArea;
-    private JTextArea outputArea;
+    private JTextArea orderItemsArea, outputArea;
 
     public OrderPanel() {
         setLayout(new BorderLayout(20, 20));
@@ -25,6 +31,7 @@ public class OrderPanel extends JPanel {
         add(createMainContent(), BorderLayout.CENTER);
     }
 
+    // ---------- HEADER PANEL ----------
     private JPanel createHeader() {
         JPanel header = new JPanel(new BorderLayout());
         header.setBackground(ModernColors.PRIMARY);
@@ -43,66 +50,102 @@ public class OrderPanel extends JPanel {
         return header;
     }
 
+    // ---------- MAIN CONTENT AREA ----------
     private JPanel createMainContent() {
         JPanel main = new JPanel(new BorderLayout(20, 20));
         main.setBackground(ModernColors.BACKGROUND);
-
         main.add(createFormPanel(), BorderLayout.NORTH);
         main.add(createOutputPanel(), BorderLayout.CENTER);
-
         return main;
     }
 
+    // ---------- ORDER FORM PANEL ----------
     private JPanel createFormPanel() {
         JPanel panel = new JPanel(new GridBagLayout());
         panel.setBackground(Color.WHITE);
         panel.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(ModernColors.BORDER, 1),
-            BorderFactory.createEmptyBorder(25, 30, 25, 30)
+                BorderFactory.createLineBorder(ModernColors.BORDER, 1),
+                BorderFactory.createEmptyBorder(25, 30, 25, 30)
         ));
 
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(12, 10, 12, 10);
+        gbc.insets = new Insets(10, 10, 10, 10);
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.anchor = GridBagConstraints.WEST;
+        gbc.weightx = 1.0;
 
-        // Initialize fields
-        customerNameField = createStyledTextField();
-        totalAmountField = createStyledTextField();
-        statusComboBox = createStyledComboBox();
-        orderItemsArea = createStyledTextArea();
+        int row = 0;
 
-        // Add form title
+        // Form Title
         JLabel formTitle = new JLabel("➕ Create New Order");
         formTitle.setFont(new Font("Segoe UI", Font.BOLD, 18));
         formTitle.setForeground(ModernColors.TEXT_PRIMARY);
-        formTitle.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0));
-        gbc.gridx = 0; gbc.gridy = 0; gbc.gridwidth = 2;
+        gbc.gridx = 0;
+        gbc.gridy = row++;
+        gbc.gridwidth = 2;
         panel.add(formTitle, gbc);
 
-        // Form fields
-        addFormField(panel, "👤 Customer Name", customerNameField, gbc, 1, 0);
-        addFormField(panel, "💰 Total Amount", totalAmountField, gbc, 2, 0);
-        addFormField(panel, "📋 Order Status", statusComboBox, gbc, 3, 0);
-        addFormField(panel, "📦 Order Items (one per line)", orderItemsArea, gbc, 4, 0, 2);
+        gbc.gridwidth = 1;
 
-        // Create button
+        // Customer Name
+        addFormField(panel, "👤 Customer Name", customerNameField = createStyledTextField(), gbc, row++);
+
+        // Total Amount
+        addFormField(panel, "💰 Total Amount", totalAmountField = createStyledTextField(), gbc, row++);
+
+        // Order Status
+        addFormField(panel, "📋 Order Status", statusComboBox = createStyledComboBox(), gbc, row++);
+
+        // Order Items Label
+        JLabel itemsLabel = new JLabel("📦 Order Items (one per line)");
+        itemsLabel.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        itemsLabel.setForeground(ModernColors.TEXT_PRIMARY);
+        gbc.gridx = 0;
+        gbc.gridy = row++;
+        gbc.gridwidth = 2;
+        panel.add(itemsLabel, gbc);
+
+        // Order Items Area
+        orderItemsArea = createStyledTextArea();
+        JScrollPane scrollPane = new JScrollPane(orderItemsArea);
+        scrollPane.setPreferredSize(new Dimension(300, 70));
+        scrollPane.setBorder(BorderFactory.createLineBorder(ModernColors.BORDER));
+        gbc.gridy = row++;
+        panel.add(scrollPane, gbc);
+
+        // Create Button
         JButton createButton = createPrimaryButton("Create Order");
         createButton.addActionListener(e -> createOrder());
-        gbc.gridy = 5; gbc.gridwidth = 2;
-        gbc.insets = new Insets(25, 0, 0, 0);
+        gbc.gridy = row;
         gbc.anchor = GridBagConstraints.CENTER;
         panel.add(createButton, gbc);
 
         return panel;
     }
 
+    private void addFormField(JPanel panel, String label, JComponent field, GridBagConstraints gbc, int row) {
+        JLabel lbl = new JLabel(label);
+        lbl.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        lbl.setForeground(ModernColors.TEXT_PRIMARY);
+
+        gbc.gridx = 0;
+        gbc.gridy = row;
+        gbc.gridwidth = 1;
+        gbc.weightx = 0.3;
+        panel.add(lbl, gbc);
+
+        gbc.gridx = 1;
+        gbc.weightx = 0.7;
+        panel.add(field, gbc);
+    }
+
+    // ---------- ORDER OUTPUT PANEL ----------
     private JPanel createOutputPanel() {
         JPanel panel = new JPanel(new BorderLayout());
         panel.setBackground(Color.WHITE);
         panel.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(ModernColors.BORDER, 1),
-            BorderFactory.createEmptyBorder(20, 20, 20, 20)
+                BorderFactory.createLineBorder(ModernColors.BORDER, 1),
+                BorderFactory.createEmptyBorder(20, 20, 20, 20)
         ));
 
         JLabel outputTitle = new JLabel("📋 Order Details");
@@ -124,12 +167,13 @@ public class OrderPanel extends JPanel {
         return panel;
     }
 
+    // ---------- UTILITY METHODS ----------
     private JTextField createStyledTextField() {
         JTextField field = new JTextField(20);
         field.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         field.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(ModernColors.BORDER, 1),
-            BorderFactory.createEmptyBorder(10, 12, 10, 12)
+                BorderFactory.createLineBorder(ModernColors.BORDER, 1),
+                BorderFactory.createEmptyBorder(10, 12, 10, 12)
         ));
         return field;
     }
@@ -137,8 +181,8 @@ public class OrderPanel extends JPanel {
     private JComboBox<Order.OrderStatus> createStyledComboBox() {
         JComboBox<Order.OrderStatus> combo = new JComboBox<>(Order.OrderStatus.values());
         combo.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        combo.setBorder(BorderFactory.createLineBorder(ModernColors.BORDER, 1));
         combo.setBackground(Color.WHITE);
+        combo.setBorder(BorderFactory.createLineBorder(ModernColors.BORDER, 1));
         return combo;
     }
 
@@ -146,8 +190,8 @@ public class OrderPanel extends JPanel {
         JTextArea area = new JTextArea(3, 20);
         area.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         area.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(ModernColors.BORDER, 1),
-            BorderFactory.createEmptyBorder(10, 12, 10, 12)
+                BorderFactory.createLineBorder(ModernColors.BORDER, 1),
+                BorderFactory.createEmptyBorder(10, 12, 10, 12)
         ));
         return area;
     }
@@ -156,7 +200,7 @@ public class OrderPanel extends JPanel {
         JButton button = new JButton(text);
         button.setFont(new Font("Segoe UI", Font.BOLD, 14));
         button.setBackground(ModernColors.PRIMARY);
-        button.setForeground(Color.WHITE);
+        button.setForeground(Color.BLACK);
         button.setBorder(BorderFactory.createEmptyBorder(12, 30, 12, 30));
         button.setFocusPainted(false);
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
@@ -176,58 +220,97 @@ public class OrderPanel extends JPanel {
     }
 
     private void addFormField(JPanel panel, String label, JComponent field, GridBagConstraints gbc, int row, int col, int width) {
-        gbc.gridx = col; gbc.gridy = row; gbc.gridwidth = 1; gbc.weightx = 0;
+        gbc.gridx = col;
+        gbc.gridy = row;
+        gbc.gridwidth = 1;
+        gbc.weightx = 0;
+
         JLabel lbl = new JLabel(label);
         lbl.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         lbl.setForeground(ModernColors.TEXT_PRIMARY);
         panel.add(lbl, gbc);
 
-        gbc.gridx = col; gbc.gridy = row + 1; gbc.gridwidth = width; gbc.weightx = 1.0;
+        gbc.gridx = col;
+        gbc.gridy = row + 1;
+        gbc.gridwidth = width;
+        gbc.weightx = 1.0;
         panel.add(field, gbc);
     }
 
-    private void createOrder() {
-        try {
-            String customerName = customerNameField.getText().trim();
-            BigDecimal total = new BigDecimal(totalAmountField.getText().trim());
-            Order.OrderStatus status = (Order.OrderStatus) statusComboBox.getSelectedItem();
-            String[] items = orderItemsArea.getText().split("\n");
+    // ---------- ORDER CREATION LOGIC ----------
+private void createOrder() {
+    String customerName = customerNameField.getText().trim();
+    String totalAmountStr = totalAmountField.getText().trim();
+    String status = statusComboBox.getSelectedItem().toString();
+  String itemsText = orderItemsArea.getText().trim();
 
-            if (customerName.isEmpty() || total.compareTo(BigDecimal.ZERO) <= 0) {
-                JOptionPane.showMessageDialog(this, "Please fill all required fields correctly.", 
-                    "Input Error", JOptionPane.ERROR_MESSAGE);
-                return;
-            }
 
-            Customer customer = new Customer();
-            customer.setFirstName(customerName);
-
-            List<OrderItem> orderItems = new ArrayList<>();
-            for (String item : items) {
-                if (!item.isBlank()) {
-                    OrderItem orderItem = new OrderItem();
-                    orderItem.getProduct().setProductName(item.trim());
-                    orderItem.setQuantity(1);
-                    orderItems.add(orderItem);
-                }
-            }
-
-            Order order = new Order();
-            order.setCustomer(customer);
-            order.setOrderDate(LocalDateTime.now());
-            order.setTotalAmount(total);
-            order.setStatus(status);
-            order.setOrderItems(orderItems);
-
-            outputArea.setText("✅ Order Created:\n\n" + order.toString());
-            clearFields();
-            JOptionPane.showMessageDialog(this, "Order created successfully!", 
-                "Success", JOptionPane.INFORMATION_MESSAGE);
-        } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), 
+    if (customerName.isEmpty() || totalAmountStr.isEmpty()) {
+        JOptionPane.showMessageDialog(this, "Please fill in all required fields.",
                 "Input Error", JOptionPane.ERROR_MESSAGE);
-        }
+        return;
     }
+
+    try {
+        Connection conn = DBConnection.getConnection(); // Handle SQLException
+CustomerDAO customerDAO = CustomerDAO.getInstance(conn); // ✅ Singleton usage
+
+        // CustomerDAO customerDAO = new CustomerDAO();
+        ModelClasses.Customer customer = customerDAO.getCustomerByName(customerName);
+
+        if (customer == null) {
+            JOptionPane.showMessageDialog(this, "Customer not found in database.",
+                    "Customer Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        BigDecimal totalAmount = new BigDecimal(totalAmountStr);
+
+        ModelClasses.Order order = new ModelClasses.Order(customer);
+        order.setOrderDate(LocalDateTime.now());
+        order.setTotalAmount(totalAmount);
+        order.setStatus(ModelClasses.Order.OrderStatus.valueOf(status));
+
+        // Optional: Parse order items if needed
+        List<ModelClasses.OrderItem> items = new ArrayList<>();
+        for (String item : itemsText.split("\n")) {
+            item = item.trim();
+            if (!item.isEmpty()) {
+                ModelClasses.Product product = new ModelClasses.Product();
+                product.setProductName(item);
+
+                ModelClasses.OrderItem orderItem = new ModelClasses.OrderItem();
+                orderItem.setProduct(product);
+                orderItem.setQuantity(1);  // Default quantity
+                items.add(orderItem);
+            }
+        }
+
+       order.setOrderItems(items);
+
+        // Insert order into database
+        OrderDAO orderDAO = new OrderDAO();
+        int result = orderDAO.insertOrder(order);
+
+        if (result > 0) {
+            outputArea.setText("✅ Order Created Successfully:\n\n" + order.toString());
+            JOptionPane.showMessageDialog(this, "Order created successfully!",
+                    "Success", JOptionPane.INFORMATION_MESSAGE);
+            clearFields();  // Optional: Reset input fields after success
+        } else {
+            JOptionPane.showMessageDialog(this, "Failed to insert order into database.",
+                    "Database Error", JOptionPane.ERROR_MESSAGE);
+        }
+
+    } catch (NumberFormatException e) {
+        JOptionPane.showMessageDialog(this, "Invalid total amount.",
+                "Input Error", JOptionPane.ERROR_MESSAGE);
+    } catch (Exception e) {
+        JOptionPane.showMessageDialog(this, "Unexpected error: " + e.getMessage(),
+                "Error", JOptionPane.ERROR_MESSAGE);
+    }
+}
+
 
     private void clearFields() {
         customerNameField.setText("");

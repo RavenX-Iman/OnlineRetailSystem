@@ -16,6 +16,25 @@ public class ProductDAO {
         this.categoryDAO = new CategoryDAO(conn);
     }
 
+    public Product getProductByName(String productName) {
+    String sql = "SELECT * FROM Products_table WHERE ProductName = ?";
+    try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+        stmt.setString(1, productName);
+        ResultSet rs = stmt.executeQuery();
+        if (rs.next()) {
+            Product product = new Product();
+            product.setProductId(rs.getInt("ProductID"));
+            product.setProductName(rs.getString("ProductName"));
+            product.setPrice(rs.getBigDecimal("Price"));
+            // Set other fields if needed
+            return product;
+        }
+    } catch (SQLException e) {
+        DBErrorHandler.handle(e, "fetch product by name");
+    }
+    return null;
+}
+
     public List<Product> getAllProducts() {
         List<Product> products = new ArrayList<>();
         String sql = "SELECT * FROM Products_table";
@@ -74,6 +93,7 @@ public class ProductDAO {
 
     public boolean insertProduct(Product product) {
         String sql = "INSERT INTO Products_table (ProductName, CategoryID, Price, Stock) VALUES (?, ?, ?, ?)";
+        
 
         try (PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 

@@ -169,14 +169,17 @@ public class ModelClasses {
         public List<Product> getProducts() { return products; }
         public void addProduct(Product p) { this.products.add(p); }
 
-        @Override
         public String toString() {
-            return "Category{" +
-                    "categoryId=" + categoryId +
-                    ", categoryName='" + categoryName + '\'' +
-                    ", productsCount=" + products.size() +
-                    '}';
+            return categoryName;
         }
+
+        // public String toString() {
+        //     return "Category{" +
+        //             "categoryId=" + categoryId +
+        //             ", categoryName='" + categoryName + '\'' +
+        //             ", productsCount=" + products.size() +
+        //             '}';
+        // }
     }
 
     public static class Product {
@@ -188,6 +191,7 @@ public class ModelClasses {
         private LocalDateTime createdAt;
         private String createdBy;
         private LocalDateTime modifiedAt;
+        
         
         public Product() {
     // Optional: initialize fields if needed
@@ -259,6 +263,16 @@ public class ModelClasses {
             stock = s;
             modifiedAt = LocalDateTime.now();
         }
+        public String getCreatedBy() {
+    return createdBy;
+}
+
+public void setCreatedBy(String createdBy) {
+    this.createdBy = createdBy;
+}
+        public LocalDateTime getModifiedAt() {
+            return modifiedAt;
+        }
 
         public boolean isInStock() { return stock > 0; }
 
@@ -312,7 +326,12 @@ public class ModelClasses {
             orderItems = new ArrayList<>();
             totalAmount = BigDecimal.ZERO;
         }
+        // Constructor with orderId
+        public Order(int orderId) {
+    this.orderId = orderId;
+}
 
+        
         // Getters and Setters
         public int getOrderId() {
             return orderId; }

@@ -4,6 +4,9 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import gui.ProductPanel;
+import gui.CustomerPanel;
+import gui.OrderPanel;
 
 public class RetailDashboard extends JFrame {
     public RetailDashboard() {

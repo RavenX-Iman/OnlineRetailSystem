@@ -6,12 +6,48 @@ import java.util.List;
 import onlineretailsystem.ModelClasses.Customer;
 
 public class CustomerDAO {
-
+    
+    private static CustomerDAO instance;
     private final Connection conn;
 
     public CustomerDAO(Connection conn) {
         this.conn = conn;
     }
+
+    public static CustomerDAO getInstance(Connection conn) {
+        if (instance == null) {
+            instance = new CustomerDAO(conn);
+        }
+        return instance;
+    }
+//    // Get customer by name
+    // This method retrieves a customer based on their first name.
+    // If multiple customers have the same first name, it returns the first one found.  
+public ModelClasses.Customer getCustomerByName(String name) {
+    String query = "SELECT * FROM Customer_table WHERE FirstName = ?";
+    try (PreparedStatement stmt = conn.prepareStatement(query)) {
+        stmt.setString(1, name);
+        ResultSet rs = stmt.executeQuery();
+        if (rs.next()) {
+            int id = rs.getInt("CustomerID");
+            String lastName = rs.getString("LastName");
+            String email = rs.getString("Email");
+            String phone = rs.getString("Phone");
+
+            ModelClasses.Customer customer = new ModelClasses.Customer();
+            customer.setCustomerId(id);
+            customer.setFirstName(name);
+            customer.setLastName(lastName);
+            customer.setEmail(email);
+            customer.setPhone(phone);
+
+            return customer;
+        }
+    } catch (SQLException e) {
+        DBErrorHandler.handle(e, "get customer by name");
+    }
+    return null;
+}
 
     // Insert a customer into the database
     public boolean insertCustomer(Customer customer) {
@@ -153,6 +189,7 @@ public class CustomerDAO {
             DBErrorHandler.handle(e, "delete customer");
         }
     }
+    
 
     // Method to close the database connection
     public void closeConnection() {
