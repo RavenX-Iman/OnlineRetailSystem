@@ -1,32 +1,37 @@
-# Ignore build output
-/out/
-/*.class
+# ==============================
+# Build output
+# ==============================
+out/
+*.class
 
-# Ignore IntelliJ IDEA project files
+# ==============================
+# IDE-specific files
+# ==============================
 .idea/
-/*.iml
-
-# Ignore VS Code settings (if any)
+*.iml
 .vscode/
 
-# Ignore OS-specific files
+# ==============================
+# OS-specific junk
+# ==============================
 .DS_Store
 Thumbs.db
 
-# Ignore compiled classes in src (only keep .java files)
-src/**/*.class
-
-# Ignore batch/run scripts from compiled output
-out/**/run_project.bat
-
-# Keep JARs in lib (so you can share dependencies)
-# If you want to ignore them, uncomment the next line:
-# /lib/*.jar
-
-# Ignore log files
+# ==============================
+# Logs and temp files
+# ==============================
 *.log
-
-# Ignore temporary/backup files
 *.tmp
 *.bak
 *~
+
+# ==============================
+# Run scripts in build output
+# ==============================
+out/**/run_project.bat
+
+# ==============================
+# Libraries (optional)
+# Keep JARs in lib so others can run project
+# Uncomment next line if you don’t want to commit JARs
+# lib/*.jar
