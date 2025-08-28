@@ -1,7 +1,7 @@
 <p align="center">
    <img width="700" height="500" alt="CyanityLogo" src="https://github.com/user-attachments/assets/1a0916c8-7d7a-4c5b-9a5a-d47f1350ca13" />
 </p>
->>>>>>> f30e41c1826efb2880bf933325f57673f593b3d4
+
 
 # CYANITY - Online Retail System
 
