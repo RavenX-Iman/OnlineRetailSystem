@@ -1,4 +1,6 @@
-<img width="500" height="500" alt="CyanityLogo" src="https://github.com/user-attachments/assets/1a0916c8-7d7a-4c5b-9a5a-d47f1350ca13" />
+<p align="center">
+   <img width="700" height="500" alt="CyanityLogo" src="https://github.com/user-attachments/assets/1a0916c8-7d7a-4c5b-9a5a-d47f1350ca13" />
+</p>
 
 # CYANITY - Online Retail System
 
@@ -57,39 +59,43 @@ CYANITY/
 ## 📸 Screenshots
 
 ### 🔐 Login Panel
-Role-based login panel for Admin and Customer access.  
-<img width="1333" height="2000" alt="LoginPanel" src="https://github.com/user-attachments/assets/f197a9df-3767-4fb4-b5f7-5864f7db7043" />
+Role-based login panel for Admin and Customer access. 
+
+<img width="600" height="600" alt="LoginPanel" src="https://github.com/user-attachments/assets/f197a9df-3767-4fb4-b5f7-5864f7db7043" />
 
 
 ---
 
 ### 📊 Dashboard & Admin Panel
-Admin dashboard showing key metrics, recent activity, and quick management access.  
-<img width="1333" height="2000" alt="Dashboardadmin" src="https://github.com/user-attachments/assets/27e9f3e9-ffa4-4a50-88aa-409dd48c336f" />
+Admin dashboard showing key metrics, recent activity, and quick management access.
+
+<img width="600" height="600" alt="Dashboardadmin" src="https://github.com/user-attachments/assets/27e9f3e9-ffa4-4a50-88aa-409dd48c336f" />
 
 
 ---
 
 ### 🛒 Product, Category & Customer Management
-Panels for managing products, categories, and customer records.  
-<img width="1333" height="2000" alt="Productcategorycustomer" src="https://github.com/user-attachments/assets/310fa098-ef17-4cd2-8bf6-2f8b7b25a0d0" />
+Panels for managing products, categories, and customer records.
+
+<img width="600" height="600" alt="Productcategorycustomer" src="https://github.com/user-attachments/assets/310fa098-ef17-4cd2-8bf6-2f8b7b25a0d0" />
 
 
 ---
 
 ### 📦 Orders, Order Items & Payments
-Order creation workflow with order items and payment processing.  
-<img width="1333" height="2000" alt="orderpayment" src="https://github.com/user-attachments/assets/479fb5b3-729a-42fe-9875-4fbb71f7d878" />
+Order creation workflow with order items and payment processing. 
+
+<img width="600" height="600" alt="orderpayment" src="https://github.com/user-attachments/assets/479fb5b3-729a-42fe-9875-4fbb71f7d878" />
 
 
 ---
 
 ### 📑 Inventory Transactions
-Logs for stock-in/out activities and real-time inventory updates.  
-<img width="1333" height="2000" alt="Inventory" src="https://github.com/user-attachments/assets/7aa5e9e3-3495-4428-bc1a-dfeff3024ef8" />
+Logs for stock-in/out activities and real-time inventory updates.
 
+<img width="600" height="600" alt="Inventory" src="https://github.com/user-attachments/assets/7aa5e9e3-3495-4428-bc1a-dfeff3024ef8" />
 
-ng)  
+  
 
 
 ## Future Improvements
