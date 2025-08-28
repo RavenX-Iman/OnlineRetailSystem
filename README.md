@@ -1,3 +1,5 @@
+![Splash Screen](screenshots/CyanityLogo.png)
+
 # CYANITY - Online Retail System
 
 ## Overview
@@ -52,12 +54,6 @@ CYANITY/
 
 
 ## 📸 Screenshots
-
-### 🟦 Splash Screen
-The entry point of CYANITY with branded splash display.  
-![Splash Screen](screenshots/CyanityLogo.png)
-
----
 
 ### 🔐 Login Panel
 Role-based login panel for Admin and Customer access.  
