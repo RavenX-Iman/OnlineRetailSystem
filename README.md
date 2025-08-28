@@ -1,6 +1,10 @@
-![Splash Screen](screenshots/CyanityLogo.png)
+<p align="center">
+   <img width="700" height="500" alt="CyanityLogo" src="https://github.com/user-attachments/assets/1a0916c8-7d7a-4c5b-9a5a-d47f1350ca13" />
+</p>
+>>>>>>> f30e41c1826efb2880bf933325f57673f593b3d4
 
 # CYANITY - Online Retail System
+
 
 ## Overview
 CYANITY is a comprehensive desktop application for retail management, integrating Java OOP principles with a SQL Server database. Developed collaboratively, this system merges concepts from Java OOP and Database Systems into a single, functional solution. It showcases our ability to build a scalable, user-friendly retail management tool with real-time data handling.
@@ -56,42 +60,49 @@ CYANITY/
 ## 📸 Screenshots
 
 ### 🔐 Login Panel
-Role-based login panel for Admin and Customer access.  
-![Login Panel](screenshots/LoginPanel.png)
+Role-based login panel for Admin and Customer access. 
+
+<img width="600" height="600" alt="LoginPanel" src="https://github.com/user-attachments/assets/f197a9df-3767-4fb4-b5f7-5864f7db7043" />
+
 
 ---
 
 ### 📊 Dashboard & Admin Panel
-Admin dashboard showing key metrics, recent activity, and quick management access.  
-![Dashboard + Admin Panel](screenshots/Dashboardadmin.png)
+Admin dashboard showing key metrics, recent activity, and quick management access.
+
+<img width="600" height="600" alt="Dashboardadmin" src="https://github.com/user-attachments/assets/27e9f3e9-ffa4-4a50-88aa-409dd48c336f" />
+
 
 ---
 
 ### 🛒 Product, Category & Customer Management
-Panels for managing products, categories, and customer records.  
-![Product + Category + Customer](screenshots/productcategorycustomer.png)
+Panels for managing products, categories, and customer records.
+
+<img width="600" height="600" alt="Productcategorycustomer" src="https://github.com/user-attachments/assets/310fa098-ef17-4cd2-8bf6-2f8b7b25a0d0" />
+
 
 ---
 
 ### 📦 Orders, Order Items & Payments
-Order creation workflow with order items and payment processing.  
-![Orders + Order Items + Payments](screenshots/orderpayment.png)
+Order creation workflow with order items and payment processing. 
+
+<img width="600" height="600" alt="orderpayment" src="https://github.com/user-attachments/assets/479fb5b3-729a-42fe-9875-4fbb71f7d878" />
+
 
 ---
 
 ### 📑 Inventory Transactions
-Logs for stock-in/out activities and real-time inventory updates.  
-![Inventory Transactions](screenshots/inventory.png)
+Logs for stock-in/out activities and real-time inventory updates.
 
-ng)  
+<img width="600" height="600" alt="Inventory" src="https://github.com/user-attachments/assets/7aa5e9e3-3495-4428-bc1a-dfeff3024ef8" />
+
+  
 
 
 ## Future Improvements
 - **User Authentication**: Implement login security with password hashing.
-- **Mobile Responsiveness**: Adapt the GUI for smaller screens.
 - **Advanced Analytics**: Add graphical stats using JavaFX or JFreeChart.
 - **Error Handling**: Enhance exception handling for better user feedback.
-- **Testing**: Incorporate unit tests with JUnit.
 
 ## Credits
 - **Developers**:
