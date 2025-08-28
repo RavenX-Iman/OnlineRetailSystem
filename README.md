@@ -99,4 +99,4 @@ ng)
 
 ## Credits
 - **Developers**:
-  **Iman Tahir | [Huma Ijaz](https://github.com/Huma-Ijaz)**
+  **Eman Tahir | [Huma Ijaz](https://github.com/Huma-Ijaz)**
