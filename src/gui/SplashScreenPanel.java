@@ -11,7 +11,7 @@ public class SplashScreenPanel extends JPanel {
         setOpaque(true); // Important to fully paint over any background
         setBackground(Color.BLACK); // Optional fallback
 
-        String path = "C:\\Users\\SL\\Desktop\\OnlineRetailSystem\\Yellow and Black Simple Retail Logo.png";
+        String path = "C:\\Users\\SL\\Desktop\\OnlineRetailSystem\\CyanityLogo.png";
         File file = new File(path);
 
         if (file.exists()) {

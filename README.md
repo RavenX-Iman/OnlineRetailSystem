@@ -50,10 +50,44 @@ CYANITY/
 3. **Run**:
    - Use `run_project.bat` in the `src` or `out/production/OnlineRetailSystem` directory, or compile with `javac src/onlineretailsystem/Main.java` and run with `java -cp lib/*;out onlineretailsystem.Main`.
 
-## Screenshots
-![Splash Screen](screenshots/splash.png)  
-![Dashboard](screenshots/dashboard.png)  
-![Order Panel](screenshots/order-panel.png)  
+
+## 📸 Screenshots
+
+### 🟦 Splash Screen
+The entry point of CYANITY with branded splash display.  
+![Splash Screen](screenshots/CyanityLogo.png)
+
+---
+
+### 🔐 Login Panel
+Role-based login panel for Admin and Customer access.  
+![Login Panel](screenshots/LoginPanel.png)
+
+---
+
+### 📊 Dashboard & Admin Panel
+Admin dashboard showing key metrics, recent activity, and quick management access.  
+![Dashboard + Admin Panel](screenshots/Dashboardadmin.png)
+
+---
+
+### 🛒 Product, Category & Customer Management
+Panels for managing products, categories, and customer records.  
+![Product + Category + Customer](screenshots/productcategorycustomer.png)
+
+---
+
+### 📦 Orders, Order Items & Payments
+Order creation workflow with order items and payment processing.  
+![Orders + Order Items + Payments](screenshots/orderpayment.png)
+
+---
+
+### 📑 Inventory Transactions
+Logs for stock-in/out activities and real-time inventory updates.  
+![Inventory Transactions](screenshots/inventory.png)
+
+ng)  
 
 
 ## Future Improvements
